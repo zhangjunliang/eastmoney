@@ -105,17 +105,12 @@ class stock(object):
                 if row['f170'] == 0 or row['f51'] == '-' or row['f52'] == '-':
                     continue
                 is_top = 0
-
-
-                sys.exit()
                 if row['f43'] == row['f51']:
                     is_top = 1
                 elif row['f43'] == row['f52']:
                     is_top = 2
                 else:
                     continue
-                print(1234)
-                sys.exit()
                 sql = """INSERT INTO daily_top
                         (name,code,market,updated,price,rate,max_price,min_price,top_price,low_price,is_top) 
                         VALUE('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}') 
@@ -144,6 +139,66 @@ class stock(object):
                     is_top)
                 self.Model.update_One(sql)
             page = page + 1
+
+    def save_daily_hot(self):
+
+        updated = datetime.date.today()
+
+        data = self.east.get_hot('',False)
+
+
+        for index,stock_row in enumerate(data):
+            secids = str(stock_row['f13']) + '.' + stock_row['f12']
+            #secids = '0.300847'
+            row = self.east.get_info(secids, '')
+
+            if row['f51'] == '-':
+                row['f51'] = 0
+            if row['f52'] == '-':
+                row['f52'] = 0
+            if row['f44'] == '-':
+                row['f44'] = 0
+            if row['f45'] == '-':
+                row['f45'] = 0
+            if row['f43'] == '-':
+                row['f43'] = 0
+            if row['f170'] == '-':
+                row['f170'] = 0
+
+            is_top = 0
+            if row['f43'] == row['f51']:
+                is_top = 1
+            elif row['f43'] == row['f52']:
+                is_top = 2
+            sql = """INSERT INTO daily_hot
+                    (name,code,market,rank,updated,price,rate,max_price,min_price,top_price,low_price,is_top) 
+                    VALUE('{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}','{}') 
+               ON DUPLICATE KEY UPDATE 
+                    code = VALUES( code ),
+                    name = VALUES( name ),
+                    market = VALUES( market ),
+                    rank = VALUES( rank ),
+                    updated = VALUES( updated ),
+                    price = VALUES( price ),
+                    rate = VALUES( rate ),
+                    max_price = VALUES( max_price ),
+                    min_price = VALUES( min_price ),
+                    top_price = VALUES( top_price ),
+                    low_price = VALUES( low_price ),
+                    is_top = VALUES( is_top )
+            """.format(row['f58'],
+                row['f57'],
+                row['f107'],
+                index + 1,
+                updated,
+                self.east._field_type(row['f43'], 2, ''),
+                self.east._field_type(row['f170'], 2, ''),
+                self.east._field_type(row['f51'], 2, ''),
+                self.east._field_type(row['f52'], 2, ''),
+                self.east._field_type(row['f44'], 2, ''),
+                self.east._field_type(row['f45'], 2, ''),
+                is_top)
+            self.Model.update_One(sql)
 
 
 def init():

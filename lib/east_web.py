@@ -3,6 +3,7 @@ import json
 import decimal
 import time
 import random
+import sys
 
 class east_web(object):
 
@@ -70,10 +71,14 @@ class east_web(object):
             .format(self._t)
         self._get('指数',url,'f14,f12,f3:0:%,f4')
 
-    def get_bk(self):
-        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=5&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136&_={}'\
-            .format(self._t)
-        self._get('板块',url,'f14,f12,f3,f128,f140,f136')
+    def get_bk(self, page = 1,limit = 5 ,fields = 'f14,f12,f3,f128,f140,f136' ,is_print = True):
+        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127&_={}'\
+            .format(str(page),str(limit),self._t)
+        #print(url)
+        if is_print:
+            self._get('板块',url,fields,is_print)
+        else:
+            return self._get('板块',url,fields,is_print)
 
     def get_bk_industry(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=5&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90+t:2+f:!50&fields=f3,f4,f12,f13,f14,f128,f136&_={}'\
@@ -152,7 +157,7 @@ class east_web(object):
             .format(self._t)
         self._get('板块涨速', url, 'f14,f12,f3,f22,f128,f140,f136')
 
-    def get_hot(self):
+    def get_hot(self,fields = 'f14,f12,f2,f3:0:%', is_print=True):
         url = 'https://emappdata.eastmoney.com/stockrank/getAllCurrentList'
         content_text = {"appId":"appId01","globalId":"786e4c21-70dc-435a-93bb-38","pageNo":1,"pageSize":100}
         html = self.__post(url,content_text)
@@ -162,7 +167,18 @@ class east_web(object):
         stock_url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?ut=f057cbcbce2a86e2866ab8877db1d059&fltt=2&invt=2&fields=f14,f148,f3,f12,f2,f13&secids={}'\
             .format(secids)
 
-        self._get('人气榜', stock_url, 'f14,f12,f2,f3:0:%')
+        if is_print:
+            self._get('人气榜', stock_url, fields, is_print)
+        else:
+            return self._get('人气榜', stock_url, fields, is_print)
+
+    def get_lhb(self,page = 1,limit  = 10 ,updated = '2021-06-23'):
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_DAILYBILLBOARD_DETAILS&sty=ALL&source=DataCenter&client=WAP&p={}&ps={}&sr=-1,1&st=TRADE_DATE,SECURITY_CODE&filter=(TRADE_DATE%3E=%27{}%27)(TRADE_DATE%3C=%27{}%27)&?v={}'\
+            .format(page,limit,updated,updated,self._t)
+        res = urllib.request.urlopen(url)
+        html = res.read().decode('utf8')
+        data = json.loads(html)
+        return data['result']['data']
 
     def get_me(self):
         url = 'https://myfavor.eastmoney.com/v4/wapouter/gstkinfos?appkey=045986a3ceba181d1fa5309652cd1939&g=1&_=1624254379431'
@@ -196,9 +212,12 @@ class east_web(object):
         res = urllib.request.urlopen(url)
         html = res.read().decode('utf8')
         data = json.loads(html)
-        list = data['data']['diff'];
+        data_list = data['data']['diff'];
         result = []
-        for index,row in enumerate(list):
+        for row in data_list:
+            if type(row) == str:
+                row = data_list[row]
+
             if fields ==  '':
                 item = row
             else:
