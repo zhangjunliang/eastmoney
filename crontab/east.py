@@ -1,15 +1,21 @@
 from lib.east_web import east_web
+from lib.BaseModel import BaseModel
+from config import Config
+import sys
 
 class east(object):
 
     def __init__(self):
+        self.Config = Config()
+        self.Model = BaseModel(self.Config.mysql)
         self.east_web = east_web()
 
-    def my(self,code_list):
+    def my(self):
+        data = self.Model.getAll("select * from stock where weight = 1")
         self.east_web.dump([],'my')
-        for code in code_list:
-            #f58,
-            data = self.east_web.get_info(code, 'f57,f43:2:,f170:2:%,f40:4:,f20:4:')
+        for row in data:
+            secid = '{}.{}'.format(row['market'],row['code'])
+            data = self.east_web.get_info(secid, 'f57,f43:2:,f170:2:%,f40:4:,f20:4:')
             self.east_web.dump(data)
 
     def top(self):

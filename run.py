@@ -16,10 +16,6 @@ obj = importlib.import_module('crontab.{}'.format(args.o))
 
 fun = getattr(obj.init(),args.f)
 
-if args.f == 'my':
-    args.p = ['0.000001', '1.601318', '1.600519', '0.300727', '0.300353', '0.300862']
-print(args)
-
 if args.p != None:
     fun(args.p)
 else:
