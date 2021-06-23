@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(description='run east')
 parser.add_argument('-o', type=str, required=True, help='obj')
 parser.add_argument('-f', type=str, required=True, default='', help='fun')
 parser.add_argument('-p', default=None, help='params')
-parser.add_argument('-t', type=int, default=0, help='params')
+parser.add_argument('-t', type=int, default=0, help='jump')
 
 args = parser.parse_args()
 
