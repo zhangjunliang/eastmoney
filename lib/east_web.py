@@ -37,9 +37,9 @@ class east_web(object):
         result = json.loads(html)
         data = result['data']
         return self._field(fields,data)
-
+    #获取股票的板块信息
     def get_stock_bk(self,code,fields):
-        url = 'https://push2.eastmoney.com/api/qt/slist/get?ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&spt=3&fields=f1,f12,f152,f3,f14,f128,f136&pi=0&pz=30&po=1&fid=f3&fid0=f4003&invt=2&secid={}&_={}'\
+        url = 'https://push2.eastmoney.com/api/qt/slist/get?ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&spt=3&fields=f1,f12,f152,f3,f14,f128,f136&pi=0&pz=30&po=1&fid=f3&invt=2&secid={}&_={}'\
             .format(code,self._t)
         res = urllib.request.urlopen(url)
         html = res.read().decode('utf8')

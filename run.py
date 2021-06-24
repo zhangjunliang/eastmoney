@@ -12,7 +12,7 @@ parser.add_argument('-t', type=int, default=0, help='jump')
 
 args = parser.parse_args()
 
-obj = importlib.import_module('crontab.{}'.format(args.o))
+obj = importlib.import_module('crontab.{}'.format(args.o),args.o)
 
 fun = getattr(obj.init(),args.f)
 
@@ -28,7 +28,10 @@ if args.t > 0:
         'misfire_grace_time': 2  # 当任务执行时间与设定时间差值的可接受范围，超过就不执行
     }
     schedule = BackgroundScheduler(job_defaults=job_defaults)
-    schedule.add_job(fun, 'interval', seconds=args.t, id='one', args=[args.p])
+    job_args = []
+    if args.p != None:
+        job_args = [args.p]
+    schedule.add_job(fun, 'interval', seconds=args.t, id='one', args=job_args)
     schedule.start()
     while True:
         time.sleep(1)
