@@ -18,7 +18,7 @@ obj = importlib.import_module('crontab.{}'.format(args.o),args.o)
 
 fun = getattr(obj.init(),args.f)
 
-if args.p != None:
+if args.p != None and args.p != '':
     fun(args.p)
 else:
     fun()
@@ -33,7 +33,7 @@ if args.t > 0:
     }
     schedule = BackgroundScheduler(job_defaults=job_defaults)
     job_args = []
-    if args.p != None:
+    if args.p != None and args.p != '':
         job_args = [args.p]
     schedule.add_job(fun, 'interval', seconds=args.t, id='one', args=job_args)
     schedule.start()
