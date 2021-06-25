@@ -43,7 +43,7 @@ class info(object):
         print(updated)
         #  having num > 1
         sql = """
-            select *,count(*) num from (
+            select *,count(*) as num from (
             select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
             and b.bk_code not in (select bk_code from bk where weight < 0) 
             and d.updated >= '{}'
@@ -72,7 +72,7 @@ class info(object):
         print(updated)
         #  having num > 1
         sql = """
-            select *,count(*) num from (
+            select *,count(*) as num from (
             select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
             and b.bk_code not in (select bk_code from bk where weight < 0) 
             and d.updated = '{}'
@@ -121,7 +121,7 @@ class info(object):
 
         sql = """select d.updated,ROUND((s.price - d.price)/d.price*100,2)  as change_rage,s.*
                 from daily_top as d left join stock as s on d.code = s.code 
-                where d.updated = '{}' order by change_rage desc
+                where d.updated = '{}' and d.code not like '688%' order by change_rage desc
         """.format(updated)
         data = self.Model.getAll(sql)
         for row in data:

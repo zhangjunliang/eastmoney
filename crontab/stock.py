@@ -46,6 +46,8 @@ class stock(object):
     def save_stock_bk(self):
         page = 0
         limit = 100
+        clear_sql = "DELETE FROM stock_bk WHERE bk_code IN ( 'BK0816', 'BK0815', 'BK0817')"
+        self.Model.update_One(clear_sql)
         while True:
             print(page)
             self.east.delay_sleep()

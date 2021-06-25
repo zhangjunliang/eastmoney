@@ -126,12 +126,12 @@ class east_web(object):
         self._get('成交额', url, 'f14,f12,f3,f2,f6')
 
     def get_tmp_top(self):
-        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=10&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f22,f148?cb=?&_={}'\
+        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=5&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f22,f148?cb=?&_={}'\
             .format(self._t)
         self._get('涨速榜', url, 'f14,f12,f3,f2,f22')
 
     def get_tmp_low(self):
-        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=10&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f22,f148?cb=?&_={}'\
+        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=5&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f22,f148?cb=?&_={}'\
             .format(self._t)
         self._get('跌速榜', url, 'f14,f12,f3,f2,f22')
 
