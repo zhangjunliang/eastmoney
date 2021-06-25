@@ -16,6 +16,11 @@ class rank(object):
 
     def save_lhb(self):
         updated = datetime.date.today()
+
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
+
         page = 1
         limit = 10
         while True:
