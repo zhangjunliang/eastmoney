@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding=UTF-8 -*-
 from lib.east_web import east_web
 from lib.BaseModel import BaseModel
 import time

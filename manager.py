@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding=UTF-8 -*-
 from flask_script import Manager
 from app import app

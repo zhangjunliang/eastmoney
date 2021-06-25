@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding=UTF-8 -*-
 import urllib.request
 import json
 import decimal
