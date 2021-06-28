@@ -10,8 +10,8 @@ import sys
 class east_web(object):
 
     _t = '1624089279383'
-    delay_min = 2
-    delay_max = 10
+    delay_min = 1
+    delay_max = 3
 
     def __init__(self):
         self._t = round(time.time()*1000)
@@ -34,18 +34,14 @@ class east_web(object):
     def get_info(self,secid,fields = 'f43'):
         url = 'https://push2.eastmoney.com/api/qt/stock/get?secid={}&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&fields=f13,f19,f20,f23,f24,f25,f26,f27,f28,f29,f30,f43,f44,f45,f46,f47,f48,f49,f50,f57,f58,f59,f60,f85,f107,f111,f113,f114,f115,f116,f117,f127,f130,f131,f132,f133,f135,f136,f137,f138,f139,f140,f141,f142,f143,f144,f145,f146,f147,f148,f149,f152,f161,f162,f164,f165,f167,f168,f169,f170,f171,f174,f175,f177,f178,f181,f182,f198,f199,f260,f261,f288,f292,f293,f294,f295,f530,f531,f51,f52&invt=2&_={}'\
             .format(secid,self._t)
-        res = urllib.request.urlopen(url)
-        html = res.read().decode('utf8')
-        result = json.loads(html)
+        result = self.__curl(url)
         data = result['data']
         return self._field(fields,data)
     #获取股票的板块信息
     def get_stock_bk(self,code,fields):
         url = 'https://push2.eastmoney.com/api/qt/slist/get?ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&spt=3&fields=f1,f12,f152,f3,f14,f128,f136&pi=0&pz=30&po=1&fid=f3&invt=2&secid={}&_={}'\
             .format(code,self._t)
-        res = urllib.request.urlopen(url)
-        html = res.read().decode('utf8')
-        result = json.loads(html)
+        result = self.__curl(url)
         list = result['data']['diff']
         data = []
         for index in list:
@@ -57,9 +53,7 @@ class east_web(object):
     def get_bk_stock(self,code,fields):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&fs={}&pn=1&pz=10&po=1&fid=f3&invt=2&_={}'\
             .format(code,self._t)
-        res = urllib.request.urlopen(url)
-        html = res.read().decode('utf8')
-        result = json.loads(html)
+        result = self.__curl(url)
         list = result['data']['diff']
         data = []
         for index in list:
@@ -142,9 +136,7 @@ class east_web(object):
         print('{}----------'.format(tags))
         url = 'https://push2.eastmoney.com/api/qt/pkyd/get?ut=bd1d9ddb04089700cf9c27f6f7426281&lmt=9&fields=f1,f2,f3,f4,f5,f6,f7?cb=?&_={}'\
             .format(self._t)
-        res = urllib.request.urlopen(url)
-        html = res.read().decode('utf8')
-        data = json.loads(html)
+        data = self.__curl(url)
         list = data['data']['pkyd']
         for row_str in list:
             row = row_str.split(',')
@@ -177,9 +169,7 @@ class east_web(object):
     def get_lhb(self,page = 1,limit  = 10 ,updated = '2021-06-23'):
         url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_DAILYBILLBOARD_DETAILS&sty=ALL&source=DataCenter&client=WAP&p={}&ps={}&sr=-1,1&st=TRADE_DATE,SECURITY_CODE&filter=(TRADE_DATE%3E=%27{}%27)(TRADE_DATE%3C=%27{}%27)&?v={}'\
             .format(page,limit,updated,updated,self._t)
-        res = urllib.request.urlopen(url)
-        html = res.read().decode('utf8')
-        data = json.loads(html)
+        data = self.__curl(url)
         return data['result']['data']
 
     def get_me(self):
@@ -191,7 +181,7 @@ class east_web(object):
                    "Cookie": "qgqp_b_id=fc02c3c5d5757e0ebe013b0d706fbdf8; st_si=84209263837817; HAList=a-sz-300059-%u4E1C%u65B9%u8D22%u5BCC; em_hq_fls=js; wap_ck2=true; ad_tc_221000003503280169=true; st_asi=delete; ct=sMsG5cOnZgRJxVuZD2_tRcyXrZ5gXdPJt9QTVDP0UCeBKG_y0Zc1-2ofo8sCS9-9_GNiZV0DEiM2pBzOvX5taCQai0wtbSykTKeH-KzxsM4h2GVNTjQIhU6LLDz3qa0sXf541mYXfqAop52eXgKjkA9aKEs_rl_f9p8l6Z60BBc; ut=FobyicMgeV4UJna6Au6ASo611uEU66P6lcORe-20kRYhzrJaWyHmvtg9Lu8rWySGIHys9DGA3uES42hfEGU0lL7XQ252U3r9-ys9kLgHkSjbLzv4p4_vWAUKo4KBEwSNbm2QhkIcoBDJBu8sN2fQN0JdvbAMlRRF-iAUIhuQ2QEmgDTD1QCmKcpL15f3bEkY6gQSEoSXPXaXXMAunzP-WUGnGa7LTxg_ahb1hVYpCshvD_VyWMahOoDYLxbEz70cVfG3hXd9oYRBngX4I_aa5rEHTEq9o3o6; pi=3704094407396500%3bm3704094407396500%3b%e4%b8%80%e5%8f%aa%e4%bf%ae%e8%a1%8c%e7%9a%84%e9%b1%bc%3b5xMsLWvtmg%2b%2bYv8kae4hv7gT1GdGTfTJlqnQx0MZdWKXomUbGYD1aWjU%2ba2X7jKsz3bN2C1ebREEBrRhiax%2baCyM1ry2fgUPN0U8Yw5x7fMMX3bEGItoNguhAKVRomeY4lkCnb5GL9tN6BhzrQ1vKjEW7INMmdK9WC6M2Ygy9J3RCgooiDXC8FPGz%2bKIlgJTEdufheVl%3bYxZMCANU00tIiZca2HK8YvhJTpOXl%2fatWWuAvXnonAQgXLNmW3KdggmEmaRuh4n8Kz1t085vCOAVbIgphijU2B7DKfEgnx%2fqLC%2f3z9iqQnqvVfO3FEXVhAqRofxPa7qPJWRNVGoFp%2brYCKr765VqqrpooYzpbA%3d%3d; uidal=3704094407396500%e4%b8%80%e5%8f%aa%e4%bf%ae%e8%a1%8c%e7%9a%84%e9%b1%bc; sid=113949887; vtpst=|; st_pvi=48598162530870; st_sp=2021-04-26%2013%3A34%3A59; st_inirUrl=https%3A%2F%2Fwww.baidu.com%2Flink; st_sn=118; st_psi=20210621134619640-113803310772-1947146732"}
 
         req = urllib.request.Request(url=url, headers=headers)
-        resp = urllib.request.urlopen(req)
+        resp = urllib.request.urlopen(req,timeout=60)
         html = resp.read().decode('utf8')
         data = json.loads(html)
 
@@ -206,14 +196,12 @@ class east_web(object):
         data = bytes(data, 'utf8')
         headers = {"Content-Type": 'application/json'}
         req = urllib.request.Request(url=url, headers=headers,data=data)
-        resp = urllib.request.urlopen(req)
+        resp = urllib.request.urlopen(req,timeout=60)
         return resp.read().decode('utf8')
 
     def _get(self,tags,url,fields,is_print = True):
         print('{}----------'.format(tags))
-        res = urllib.request.urlopen(url)
-        html = res.read().decode('utf8')
-        data = json.loads(html)
+        data = self.__curl(url)
         data_list = data['data']['diff'];
         result = []
         for row in data_list:
@@ -277,3 +265,9 @@ class east_web(object):
 
             item.append(val)
         return item
+
+    def __curl(self,url):
+        res = urllib.request.urlopen(url, timeout=60)
+        html = res.read().decode('utf8')
+        data = json.loads(html)
+        return data
