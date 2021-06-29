@@ -50,6 +50,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated >= '{}'
 
             union all 
@@ -57,6 +58,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated >= '{}'
 
             union all
@@ -64,6 +66,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated >= '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -82,6 +85,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated >= '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -100,6 +104,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated >= '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -118,6 +123,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated >= '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -136,6 +142,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated = '{}'
             
             union all 
@@ -143,6 +150,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated = '{}'
             
             union all
@@ -150,6 +158,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated = '{}'
             ) as t group by t.bk_code order by num
         """.format(updated,updated,updated)
@@ -168,6 +177,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated = '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -186,6 +196,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated = '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -204,6 +215,7 @@ class info(object):
                 select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
                 and b.bk_code not in (select bk_code from bk where weight < 0) 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.name not like '%退'
                 and d.updated = '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
@@ -221,7 +233,9 @@ class info(object):
             select d.*,count(*) as num from daily_top as d 
             where d.is_top = 1  
             and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
-            and d.updated >= '{}' and d.code not like '688%' group by d.code
+            and d.updated >= '{}' and d.code not like '688%'
+            and d.name not like '%退'
+            group by d.code
             order by num 
         """.format(updated)
         data = self.Model.getAll(sql)
@@ -239,7 +253,9 @@ class info(object):
                 from daily_top as d left join stock as s on d.code = s.code 
                 where d.updated = '{}' 
                 and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
-                and d.code not like '688%' order by change_rage desc
+                and d.code not like '688%' 
+                and d.name not like '%退'
+                order by change_rage desc
         """.format(updated)
         data = self.Model.getAll(sql)
         for row in data:
@@ -249,9 +265,10 @@ class info(object):
     def top(self):
         sql = """
             select d.*,count(*) as num from daily_top as d  
-            where d.is_top = 1 
+            where d.is_top = 1
             and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
             and d.code not like '688%'
+            and d.name not like '%退'
             group by d.code order by num
         """
         data = self.Model.getAll(sql)
