@@ -97,6 +97,12 @@ class stock(object):
                 print('over')
                 sys.exit()
             for stock_row in data:
+                #
+                if (stock_row['rate'] < 9.5 and stock_row['rate'] > 6) \
+                    or (stock_row['rate'] < 4.5 and stock_row['rate'] > -4.5) \
+                    or (stock_row['rate'] > -9.5 and stock_row['rate'] < -6):
+                    continue
+
                 secids = str(stock_row['market']) + '.' + stock_row['code']
                 #secids = '0.300847'
                 try:

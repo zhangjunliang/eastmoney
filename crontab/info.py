@@ -47,21 +47,78 @@ class info(object):
         #  having num > 1
         sql = """
             select *,count(*) as num from (
-            select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
-            and b.bk_code not in (select bk_code from bk where weight < 0) 
-            and d.updated >= '{}'
+                select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated >= '{}'
 
             union all 
 
-            select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
-            and b.bk_code not in (select bk_code from bk where weight < 0) 
-            and d.updated >= '{}'
+                select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated >= '{}'
 
             union all
 
-            select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
-            and b.bk_code not in (select bk_code from bk where weight < 0) 
-            and d.updated >= '{}'
+                select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated >= '{}'
+            ) as t group by t.bk_code order by num
+        """.format(updated, updated, updated)
+        data = self.Model.getAll(sql)
+        for row in data:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def top_bk_top_num(self, updated=None):
+        if updated == None:
+            updated = datetime.date.today()
+        print(updated)
+        #  having num > 1
+        sql = """
+            select *,count(*) as num from (
+                select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated >= '{}'
+            ) as t group by t.bk_code order by num
+        """.format(updated, updated, updated)
+        data = self.Model.getAll(sql)
+        for row in data:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def top_bk_hot_num(self, updated=None):
+        if updated == None:
+            updated = datetime.date.today()
+        print(updated)
+        #  having num > 1
+        sql = """
+            select *,count(*) as num from (
+                select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated >= '{}'
+            ) as t group by t.bk_code order by num
+        """.format(updated, updated, updated)
+        data = self.Model.getAll(sql)
+        for row in data:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def top_bk_lhb_num(self, updated=None):
+        if updated == None:
+            updated = datetime.date.today()
+        print(updated)
+        #  having num > 1
+        sql = """
+            select *,count(*) as num from (
+                select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated >= '{}'
             ) as t group by t.bk_code order by num
         """.format(updated, updated, updated)
         data = self.Model.getAll(sql)
@@ -76,21 +133,24 @@ class info(object):
         #  having num > 1
         sql = """
             select *,count(*) as num from (
-            select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
-            and b.bk_code not in (select bk_code from bk where weight < 0) 
-            and d.updated = '{}'
+                select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated = '{}'
             
             union all 
             
-            select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
-            and b.bk_code not in (select bk_code from bk where weight < 0) 
-            and d.updated = '{}'
+                select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated = '{}'
             
             union all
             
-            select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
-            and b.bk_code not in (select bk_code from bk where weight < 0) 
-            and d.updated = '{}'
+                select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated = '{}'
             ) as t group by t.bk_code order by num
         """.format(updated,updated,updated)
         data = self.Model.getAll(sql)
@@ -98,23 +158,76 @@ class info(object):
             str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
             print(str)
 
-    def top_num(self, updated=None):
-
+    def top_bk_top(self, updated=None):
         if updated == None:
             updated = datetime.date.today()
         print(updated)
         #  having num > 1
         sql = """
-            select d.*,count(*) as num from daily_top as d  where d.is_top = 1 
-            and d.updated >= '{}' group by d.code
+            select *,count(*) as num from (
+                select b.bk_name,b.bk_code  from daily_top as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated = '{}'
+            ) as t group by t.bk_code order by num
+        """.format(updated, updated, updated)
+        data = self.Model.getAll(sql)
+        for row in data:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def top_bk_hot(self, updated=None):
+        if updated == None:
+            updated = datetime.date.today()
+        print(updated)
+        #  having num > 1
+        sql = """
+            select *,count(*) as num from (
+                select b.bk_name,b.bk_code  from daily_hot as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated = '{}'
+            ) as t group by t.bk_code order by num
+        """.format(updated, updated, updated)
+        data = self.Model.getAll(sql)
+        for row in data:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def top_bk_lhb(self, updated=None):
+        if updated == None:
+            updated = datetime.date.today()
+        print(updated)
+        #  having num > 1
+        sql = """
+            select *,count(*) as num from (
+                select b.bk_name,b.bk_code  from daily_lhb as d inner join stock_bk as b on d.code = b.code where d.is_top = 1 
+                and b.bk_code not in (select bk_code from bk where weight < 0) 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.updated = '{}'
+            ) as t group by t.bk_code order by num
+        """.format(updated, updated, updated)
+        data = self.Model.getAll(sql)
+        for row in data:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def top_num(self, updated=None):
+        if updated == None:
+            updated = datetime.date.today()
+        print(updated)
+        #  having num > 1
+        sql = """
+            select d.*,count(*) as num from daily_top as d 
+            where d.is_top = 1  
+            and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+            and d.updated >= '{}' and d.code not like '688%' group by d.code
             order by num 
         """.format(updated)
         data = self.Model.getAll(sql)
         for row in data:
             str = "{}|{}|{}".format(row['name'], row['code'], row['num'])
             print(str)
-
-
 
     def top_diff(self,updated = None):
 
@@ -124,7 +237,9 @@ class info(object):
 
         sql = """select d.updated,ROUND((s.price - d.price)/d.price*100,2)  as change_rage,s.*
                 from daily_top as d left join stock as s on d.code = s.code 
-                where d.updated = '{}' and d.code not like '688%' order by change_rage desc
+                where d.updated = '{}' 
+                and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+                and d.code not like '688%' order by change_rage desc
         """.format(updated)
         data = self.Model.getAll(sql)
         for row in data:
@@ -132,7 +247,13 @@ class info(object):
             print(str)
 
     def top(self):
-        sql = 'select d.*,count(*) as num from daily_top as d  where d.is_top = 1 group by d.code order by num'
+        sql = """
+            select d.*,count(*) as num from daily_top as d  
+            where d.is_top = 1 
+            and d.code not in (select code from stock_bk as sb LEFT JOIN bk as b on sb.bk_code = b.bk_code where  weight = -10) 
+            and d.code not like '688%'
+            group by d.code order by num
+        """
         data = self.Model.getAll(sql)
         for row in data:
             str = "{}|{}|{}".format(row['name'], row['code'],row['num'])
