@@ -29,12 +29,16 @@ class bk(object):
                 print('over')
                 sys.exit()
             for row in result:
-                sql = """INSERT INTO bk (bk_name,bk_code,rate,rate_3) VALUE('{}','{}','{}','{}') ON DUPLICATE KEY UPDATE 
+
+                bk_id = int(row['f12'][2:])
+
+                sql = """INSERT INTO bk (id,bk_name,bk_code,rate,rate_3) VALUE('{}','{}','{}','{}','{}') ON DUPLICATE KEY UPDATE 
+                    id = VALUES( id ),
                     bk_name = VALUES( bk_name ),
                     bk_code = VALUES( bk_code ),
                     rate = VALUES( rate ),
                     rate_3 = VALUES( rate_3 )
-                """.format(row['f14'], row['f12'], row['f3'],row['f127'])
+                """.format(bk_id, row['f14'], row['f12'], row['f3'],row['f127'])
                 self.Model.update_One(sql)
 
             page = page + 1
