@@ -22,15 +22,18 @@ class stock(object):
         page = 1
         while True:
             print(page)
+            self.east.delay_sleep()
             num = 100
             url = 'https://push2.eastmoney.com/api/qt/clist/get?ut=7eea3edcaed734bea9cbfc24409ed989&pn={}&pz={}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f14,f12,f2,f3,f13&_={}' \
                 .format(page, num, self._t)
             try:
                 result = self.east._get('all', url, 'f14,f12,f13,f2,f3',is_print=False)
-            except Exception as e:
-                print(e)
+            except TypeError as e:
+                print(repr(e))
                 print('over')
                 sys.exit()
+            except Exception as e:
+                break
 
             for row in result:
                 if row[3] == '-':

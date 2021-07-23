@@ -65,7 +65,7 @@ class east_web(object):
     def get_index(self):
         url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f12,f13,f14&secids=1.000001,0.399001,0.399006,1.000300,0.399005&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}'\
             .format(self._t)
-        self._get('指数',url,'f14,f12,f3:0:%,f4')
+        self._get('指数',url,'f14,f2,f3:0:%,f4')
 
     def get_bk(self, page = 1,limit = 5 ,fields = 'f14,f12,f3,f128,f140,f136' ,is_print = True):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127&_={}'\

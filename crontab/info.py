@@ -276,6 +276,24 @@ class info(object):
             str = "{}|{}|{}".format(row['name'], row['code'],row['num'])
             print(str)
 
+    def hot_bk(self,rate = 9):
+        sql = """
+            SELECT 
+                sb.bk_name,sb.bk_code,count(*) as num
+            FROM  stock as s 
+            inner join stock_bk as sb on s.code = sb.code 
+            where s.rate >= '{}' and sb.bk_code not in (select bk_code from bk where weight < 0)
+            group by sb.bk_code
+            order by num desc
+            limit 10
+        """.format(rate)
+        data = self.Model.getAll(sql)
+        for row in data[: :-1]:
+            str = "{}|{}|{}".format(row['bk_name'], row['bk_code'], row['num'])
+            print(str)
+
+    def hot_top(self,limit = 10):
+        pass
 
 def init():
     return info()
