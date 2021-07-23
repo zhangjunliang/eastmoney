@@ -181,7 +181,7 @@ class east_web(object):
                    "Cookie": "qgqp_b_id=fc02c3c5d5757e0ebe013b0d706fbdf8; st_si=84209263837817; HAList=a-sz-300059-%u4E1C%u65B9%u8D22%u5BCC; em_hq_fls=js; wap_ck2=true; ad_tc_221000003503280169=true; st_asi=delete; ct=sMsG5cOnZgRJxVuZD2_tRcyXrZ5gXdPJt9QTVDP0UCeBKG_y0Zc1-2ofo8sCS9-9_GNiZV0DEiM2pBzOvX5taCQai0wtbSykTKeH-KzxsM4h2GVNTjQIhU6LLDz3qa0sXf541mYXfqAop52eXgKjkA9aKEs_rl_f9p8l6Z60BBc; ut=FobyicMgeV4UJna6Au6ASo611uEU66P6lcORe-20kRYhzrJaWyHmvtg9Lu8rWySGIHys9DGA3uES42hfEGU0lL7XQ252U3r9-ys9kLgHkSjbLzv4p4_vWAUKo4KBEwSNbm2QhkIcoBDJBu8sN2fQN0JdvbAMlRRF-iAUIhuQ2QEmgDTD1QCmKcpL15f3bEkY6gQSEoSXPXaXXMAunzP-WUGnGa7LTxg_ahb1hVYpCshvD_VyWMahOoDYLxbEz70cVfG3hXd9oYRBngX4I_aa5rEHTEq9o3o6; pi=3704094407396500%3bm3704094407396500%3b%e4%b8%80%e5%8f%aa%e4%bf%ae%e8%a1%8c%e7%9a%84%e9%b1%bc%3b5xMsLWvtmg%2b%2bYv8kae4hv7gT1GdGTfTJlqnQx0MZdWKXomUbGYD1aWjU%2ba2X7jKsz3bN2C1ebREEBrRhiax%2baCyM1ry2fgUPN0U8Yw5x7fMMX3bEGItoNguhAKVRomeY4lkCnb5GL9tN6BhzrQ1vKjEW7INMmdK9WC6M2Ygy9J3RCgooiDXC8FPGz%2bKIlgJTEdufheVl%3bYxZMCANU00tIiZca2HK8YvhJTpOXl%2fatWWuAvXnonAQgXLNmW3KdggmEmaRuh4n8Kz1t085vCOAVbIgphijU2B7DKfEgnx%2fqLC%2f3z9iqQnqvVfO3FEXVhAqRofxPa7qPJWRNVGoFp%2brYCKr765VqqrpooYzpbA%3d%3d; uidal=3704094407396500%e4%b8%80%e5%8f%aa%e4%bf%ae%e8%a1%8c%e7%9a%84%e9%b1%bc; sid=113949887; vtpst=|; st_pvi=48598162530870; st_sp=2021-04-26%2013%3A34%3A59; st_inirUrl=https%3A%2F%2Fwww.baidu.com%2Flink; st_sn=118; st_psi=20210621134619640-113803310772-1947146732"}
 
         req = urllib.request.Request(url=url, headers=headers)
-        resp = urllib.request.urlopen(req,timeout=60)
+        resp = urllib.request.urlopen(req,timeout=10)
         html = resp.read().decode('utf8')
         data = json.loads(html)
 
@@ -196,7 +196,7 @@ class east_web(object):
         data = bytes(data, 'utf8')
         headers = {"Content-Type": 'application/json'}
         req = urllib.request.Request(url=url, headers=headers,data=data)
-        resp = urllib.request.urlopen(req,timeout=60)
+        resp = urllib.request.urlopen(req,timeout=10)
         return resp.read().decode('utf8')
 
     def _get(self,tags,url,fields,is_print = True):
@@ -267,7 +267,7 @@ class east_web(object):
         return item
 
     def __curl(self,url):
-        res = urllib.request.urlopen(url, timeout=60)
+        res = urllib.request.urlopen(url, timeout=10)
         html = res.read().decode('utf8')
         data = json.loads(html)
         return data

@@ -30,10 +30,12 @@ class rank(object):
             print(page)
             try:
                 data = self.east.get_lhb(page, limit, updated)
-            except Exception as e:
-                print(e)
+            except TypeError as e:
+                print(repr(e))
                 print('over')
                 sys.exit()
+            except Exception as e:
+                break
 
             for stock_row in data:
                 if stock_row['MARKET'] == 'SZ':

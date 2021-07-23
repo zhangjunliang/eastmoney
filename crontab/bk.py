@@ -30,10 +30,12 @@ class bk(object):
             print(page)
             try:
                 result = self.east.get_bk(page,limit,'',False)
-            except Exception as e:
-                print(e)
+            except TypeError as e:
+                print(repr(e))
                 print('over')
                 sys.exit()
+            except Exception as e:
+                break
             for row in result:
 
                 bk_id = int(row['f12'][2:])
