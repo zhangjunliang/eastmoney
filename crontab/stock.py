@@ -18,6 +18,11 @@ class stock(object):
 
     ## 保存所有股票信息
     def save_stock(self):
+        updated = datetime.date.today()
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
+
         print('start')
         page = 1
         while True:
@@ -49,6 +54,12 @@ class stock(object):
             page = page + 1
 
     def save_stock_bk(self):
+
+        updated = datetime.date.today()
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
+
         page = 0
         limit = 100
         clear_sql = "DELETE FROM stock_bk WHERE bk_code IN ( 'BK0816', 'BK0815', 'BK0817')"

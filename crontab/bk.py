@@ -18,6 +18,12 @@ class bk(object):
         self._t = round(time.time() * 1000)
 
     def save_bk(self):
+        updated = datetime.date.today()
+
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
+
         page = 1
         limit = 100
         while True:
