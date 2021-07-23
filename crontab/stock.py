@@ -38,7 +38,7 @@ class stock(object):
                 print('over')
                 sys.exit()
             except Exception as e:
-                break
+                continue
 
             for row in result:
                 if row[3] == '-':
@@ -79,7 +79,7 @@ class stock(object):
                 except Exception as e:
                     print(e)
                     page = page - 1
-                    break;
+                    break
 
                 for row in bk_data:
                     sql = """INSERT INTO stock_bk
@@ -124,7 +124,7 @@ class stock(object):
                 except Exception as e:
                     print(e)
                     page = page - 1
-                    break;
+                    break
 
                 if row['f170'] == 0 or row['f51'] == '-' or row['f52'] == '-':
                     continue

@@ -35,7 +35,7 @@ class bk(object):
                 print('over')
                 sys.exit()
             except Exception as e:
-                break
+                continue
             for row in result:
 
                 bk_id = int(row['f12'][2:])

@@ -35,7 +35,7 @@ class rank(object):
                 print('over')
                 sys.exit()
             except Exception as e:
-                break
+                continue
 
             for stock_row in data:
                 if stock_row['MARKET'] == 'SZ':
