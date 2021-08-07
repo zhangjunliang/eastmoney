@@ -63,11 +63,11 @@ class east_web(object):
         return data
 
     def get_index(self):
-        url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f12,f13,f14&secids=1.000001,0.399001,0.399006,1.000300,0.399005&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}'\
+        url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f6,f12,f13,f14,f62&secids=1.000001,0.399001,0.399006,1.000688,100.HSI,1.000300,0.399005&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}'\
             .format(self._t)
-        self._get('指数',url,'f14,f2,f3:0:%,f4')
+        self._get('指数',url,'f14,f2,f3:0:%,f6:8:亿,f62:0:')
 
-    def get_bk(self, page = 1,limit = 5 ,fields = 'f14,f12,f3,f128,f140,f136' ,is_print = True):
+    def get_bk(self, page = 1,limit = 8 ,fields = 'f14,f12,f3,f128,f140,f136' ,is_print = True):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127&_={}'\
             .format(str(page),str(limit),self._t)
         #print(url)
@@ -150,6 +150,99 @@ class east_web(object):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=10&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:90&fields=f2,f3,f4,f6,f8,f10,f12,f13,f14,f19,f22,f128,f136,f148?cb=?&_={}'\
             .format(self._t)
         self._get('板块涨速', url, 'f14,f12,f3,f22,f128,f140,f136')
+
+    def get_kzc(self):
+        sortField = 'BondRisePercent'
+        pageSize = 10
+        url = 'https://emdcmiddleware.eastmoney.com/api/StockPool/BondList?pageSize={}&sortField={}&sortType=0&startIndex=1' \
+            .format(pageSize,sortField,self._t)
+        print('{}----------'.format('可转债'))
+        data = self.__curl(url)
+        for row in data['Data']['List']:
+            str = []
+            str.append(row['BondName'])
+            str.append(row['BondCode'])
+            str.append(row['BondNewPrice'])
+            str.append(row['BondRisePercent'])
+            str.append(row['SecurityName'])
+            str.append(row['SecurityCode'])
+            str.append(row['NewPrice'])
+            str.append(row['RisePercent'])
+            print('|'.join(str))
+
+    def get_kzc_top(self):
+        sortField = 'RisePercent'
+        pageSize = 10
+        url = 'https://emdcmiddleware.eastmoney.com/api/StockPool/BondList?pageSize={}&sortField={}&sortType=0&startIndex=1' \
+            .format(pageSize,sortField,self._t)
+        print('{}----------'.format('可转债'))
+        data = self.__curl(url)
+        for row in data['Data']['List']:
+            str = []
+            str.append(row['BondName'])
+            str.append(row['BondCode'])
+            str.append(row['BondNewPrice'])
+            str.append(row['BondRisePercent'])
+            str.append(row['SecurityName'])
+            str.append(row['SecurityCode'])
+            str.append(row['NewPrice'])
+            str.append(row['RisePercent'])
+            print('|'.join(str))
+
+    def get_info(self):
+        print('{}----------'.format('行情'))
+        url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f6,f12,f13,f14,f62&secids=1.000001,0.399001&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}' \
+            .format(self._t)
+        index_data = self.__curl(url)
+        result_001 = index_data['data']['diff'][0]
+        result_002 = index_data['data']['diff'][1]
+
+#self._get('指数',url,'f14,f2,f3:0:%,f6:8:亿,f62:0:')
+        str001 = '{}|{}|{}|{}|{}'.format(result_001['f14'],
+                                         result_001['f2'],
+                                         self._field_type(result_001['f3'],0,'%'),
+                                         self._field_type(result_001['f6'],8,'亿'),
+                                         self._field_type(result_001['f62'],8,'亿'))
+        print(str001)
+        str002 = '{}|{}|{}|{}|{}'.format(result_002['f14'],
+                                         result_002['f2'],
+                                         self._field_type(result_002['f3'], 0, '%'),
+                                         self._field_type(result_002['f6'], 8, '亿'),
+                                         self._field_type(result_002['f62'], 8, '亿'))
+        print(str002)
+
+        str003= '{}|{}|{}'.format('交易额',
+                                         self._field_type(result_001['f6'] + result_002['f6'], 8, '亿'),
+                                         self._field_type(result_001['f62'] + result_002['f62'], 8, '亿'))
+        print(str003)
+        # ---
+        self.get_money()
+        # ---
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPTAAA_DMSK_TS_CHANGESTATISTICS&?v={}' \
+            .format(self._t)
+        data = self.__curl(url)
+        result = data['result']['data'][0]
+        str1 = '{}|{}|{}|{}(at)'.format('涨', result['IND1'], result['IND3'], result['IND4'])
+        str2 = '{}|{}|{}|{}(at)'.format('跌', result['IND2'], result['IND5'], result['IND6'])
+        print(str1,str2)
+        print('+5:{}|+1:{}|+0:{}|{}|-0:{}|-1:{}|-5:{}'.format(result['INDEX8'],
+                                                                      result['INDEX7'],
+                                                                      result['INDEX6'],
+                                                                      result['INDEX5'],
+                                                                      result['INDEX4'],
+                                                                      result['INDEX3'],
+                                                                      result['INDEX2']))
+
+    def get_money(self):
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_MUTUAL_QUOTA&sty=TRADE_DATE,MUTUAL_TYPE,CLOSED_REASON,BOARD_TYPE,MUTUAL_TYPE_NAME,FUNDS_DIRECTION,INDEX_CODE,INDEX_NAME,START_TIME,END_TIME,BOARD_CODE&callback=&extraCols=status%7C07%7CBOARD_CODE,dayNetAmtIn%7C07%7CBOARD_CODE,dayAmtRemain%7C07%7CBOARD_CODE,dayAmtThreshold%7C07%7CBOARD_CODE,f104%7C07%7CBOARD_CODE,f105%7C07%7CBOARD_CODE,f106%7C07%7CBOARD_CODE,f3%7C03%7CINDEX_CODE%7CINDEX_f3,netBuyAmt%7C07%7CBOARD_CODE&filter=&p=1&ps=200&sr=1&st=MUTUAL_TYPE&token=&var=&source=DataCenter&client=APP'
+        data = self.__curl(url)
+        result0 = data['result']['data'][0]
+        result2 = data['result']['data'][2]
+
+        str1 = '{}|{}'.format(result0['BOARD_TYPE'], self._field_type(result0['netBuyAmt'],4,'亿'))
+        str2 = '{}|{}'.format(result2['BOARD_TYPE'], self._field_type(result2['netBuyAmt'],4,'亿'))
+        str3 = '{}|{}'.format('北向资金', self._field_type(result0['netBuyAmt']+ result2['netBuyAmt'],4,'亿'))
+        print(str3,str1,str2)
 
     def get_hot(self,fields = 'f14,f12,f2,f3:0:%', is_print=True):
         url = 'https://emappdata.eastmoney.com/stockrank/getAllCurrentList'
