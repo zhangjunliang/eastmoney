@@ -189,7 +189,7 @@ class east_web(object):
             str.append(row['RisePercent'])
             print('|'.join(str))
 
-    def get_info(self):
+    def get_market(self):
         print('{}----------'.format('行情'))
         url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f6,f12,f13,f14,f62&secids=1.000001,0.399001&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}' \
             .format(self._t)
