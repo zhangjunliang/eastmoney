@@ -191,27 +191,25 @@ class east_web(object):
 
     def get_market(self):
         print('{}----------'.format('行情'))
-        url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f6,f12,f13,f14,f62&secids=1.000001,0.399001&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}' \
-            .format(self._t)
+
+        code = '1.000001,0.399001,0.399006,1.000688,100.HSI,1.000300,0.399005'
+        url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f6,f12,f13,f14,f62&secids={}&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}' \
+            .format(code,self._t)
         index_data = self.__curl(url)
         result_001 = index_data['data']['diff'][0]
         result_002 = index_data['data']['diff'][1]
 
-#self._get('指数',url,'f14,f2,f3:0:%,f6:8:亿,f62:0:')
-        str001 = '{}|{}|{}|{}|{}'.format(result_001['f14'],
-                                         result_001['f2'],
-                                         self._field_type(result_001['f3'],0,'%'),
-                                         self._field_type(result_001['f6'],8,'亿'),
-                                         self._field_type(result_001['f62'],8,'亿'))
-        print(str001)
-        str002 = '{}|{}|{}|{}|{}'.format(result_002['f14'],
-                                         result_002['f2'],
-                                         self._field_type(result_002['f3'], 0, '%'),
-                                         self._field_type(result_002['f6'], 8, '亿'),
-                                         self._field_type(result_002['f62'], 8, '亿'))
-        print(str002)
+        index_list = []
+        for row in index_data['data']['diff']:
+            # str_row = '{}|{}|{}|{}|{}'.format(row['f14'],
+            #                                  row['f2'],
+            #                                  self._field_type(row['f3'],0,'%'),
+            #                                  self._field_type(row['f6'],8,'亿'),
+            #                                  self._field_type(row['f62'],8,'亿'))
+            index_list.append('{}|{}'.format(str(row['f14'])[0:2],self._field_type(row['f3'],0,'%')))
+        print(' '.join(index_list))
 
-        str003= '{}|{}|{}'.format('交易额',
+        str003= '{}|{}|{}'.format('交易',
                                          self._field_type(result_001['f6'] + result_002['f6'], 8, '亿'),
                                          self._field_type(result_001['f62'] + result_002['f62'], 8, '亿'))
         print(str003)
@@ -239,9 +237,9 @@ class east_web(object):
         result0 = data['result']['data'][0]
         result2 = data['result']['data'][2]
 
-        str1 = '{}|{}'.format(result0['BOARD_TYPE'], self._field_type(result0['netBuyAmt'],4,'亿'))
-        str2 = '{}|{}'.format(result2['BOARD_TYPE'], self._field_type(result2['netBuyAmt'],4,'亿'))
-        str3 = '{}|{}'.format('北向资金', self._field_type(result0['netBuyAmt']+ result2['netBuyAmt'],4,'亿'))
+        str1 = '{}|{}'.format(str(result0['BOARD_TYPE'])[0:1], self._field_type(result0['netBuyAmt'],4,'亿'))
+        str2 = '{}|{}'.format(str(result2['BOARD_TYPE'])[0:1], self._field_type(result2['netBuyAmt'],4,'亿'))
+        str3 = '{}|{}'.format('北向', self._field_type(result0['netBuyAmt']+ result2['netBuyAmt'],4,'亿'))
         print(str3,str1,str2)
 
     def get_hot(self,fields = 'f14,f12,f2,f3:0:%', is_print=True):
