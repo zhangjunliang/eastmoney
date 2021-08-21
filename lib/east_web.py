@@ -242,6 +242,32 @@ class east_web(object):
         str3 = '{}|{}'.format('北向', self._field_type(result0['netBuyAmt']+ result2['netBuyAmt'],4,'亿'))
         print(str3,str1,str2)
 
+    def get_bk_input(self):
+        #&filter=(BOARD_TYPE=%221%22)
+        sr = '-1'
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_FUNDFLOW_BOARDCODE&sty=ALL&source=SECURITIES&client=WAP&extraCols=f3%7C06%7CINDEX_CODE%7CCHANGE_RATE,MAIN_NETINFLOW%7C06%7CINDEX_CODE%7CMAIN_NETINFLOW&p=1&ps={}&sr={}&st=MAIN_NETINFLOW&?v={}' \
+            .format(10, sr, self._t)
+        result = self.__curl(url)
+        data = result['result']['data']
+        data = data[::-1]
+        for row in data:
+            str = '{}|{}|{}|{}' \
+                  .format(row['BOARD_NAME'],row['INDEX_CODE'],row['CHANGE_RATE'],self._field_type(row['MAIN_NETINFLOW'],8,'亿'))
+            print(str)
+
+    def get_bk_out(self):
+        filter = '&filter=(BOARD_TYPE=%222%22)'
+        sr = '1'
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_FUNDFLOW_BOARDCODE&sty=ALL{}&source=SECURITIES&client=WAP&extraCols=f3%7C06%7CINDEX_CODE%7CCHANGE_RATE,MAIN_NETINFLOW%7C06%7CINDEX_CODE%7CMAIN_NETINFLOW&p=1&ps={}&sr={}&st=MAIN_NETINFLOW&?v={}' \
+            .format(filter,10,sr,self._t)
+        result = self.__curl(url)
+        data = result['result']['data']
+        data = data[::-1]
+        for row in data:
+            str = '{}|{}|{}|{}' \
+                  .format(row['BOARD_NAME'],row['INDEX_CODE'],row['CHANGE_RATE'],self._field_type(row['MAIN_NETINFLOW'],8,'亿'))
+            print(str)
+
     def get_hot(self,fields = 'f14,f12,f2,f3:0:%', is_print=True):
         url = 'https://emappdata.eastmoney.com/stockrank/getAllCurrentList'
         content_text = {"appId":"appId01","globalId":"786e4c21-70dc-435a-93bb-38","pageNo":1,"pageSize":100}
