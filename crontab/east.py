@@ -13,6 +13,20 @@ class east(object):
         self.Model = BaseModel(self.Config.mysql)
         self.east_web = east_web()
 
+    def help(self):
+        data =  (list(filter(lambda m:
+                            not m.startswith("__") and
+                            not m.endswith("__") and
+                            not m.startswith("_") and
+                            not m.startswith("dump") and
+                            not m.startswith("methods") and
+                            callable(getattr(self, m)),dir(self))))
+        for row in data:
+            if type(row) != list:
+                print('|'.join(str(i) for i in data))
+                return
+            print('|'.join(str(i) for i in row))
+
     def code(self,code):
         info = self.Model.getOne("select * from stock where code = '{}'".format(code))
         secid = '{}.{}'.format(info['market'], info['code'])
@@ -51,7 +65,7 @@ class east(object):
 
     def info(self,fun):
         if fun == 'help':
-            self.east_web.dump(self.east_web.methods())
+            self.east_web.dump(self.east_web.help())
         else:
             do = getattr(self.east_web, 'get_' + fun)
             do()

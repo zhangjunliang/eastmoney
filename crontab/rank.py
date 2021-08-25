@@ -17,6 +17,20 @@ class rank(object):
         self.east = east_web()
         self._t = round(time.time() * 1000)
 
+    def help(self):
+        data =  (list(filter(lambda m:
+                            not m.startswith("__") and
+                            not m.endswith("__") and
+                            not m.startswith("_") and
+                            not m.startswith("dump") and
+                            not m.startswith("methods") and
+                            callable(getattr(self, m)),dir(self))))
+        for row in data:
+            if type(row) != list:
+                print('|'.join(str(i) for i in data))
+                return
+            print('|'.join(str(i) for i in row))
+
     def save_lhb(self):
         updated = datetime.date.today()
 

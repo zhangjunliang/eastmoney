@@ -21,7 +21,7 @@ class east_web(object):
         print("delay:"+str(delay))
         time.sleep(delay)
 
-    def methods(self):
+    def help(self):
         return (list(filter(lambda m:
                             not m.startswith("__") and
                             not m.endswith("__") and
