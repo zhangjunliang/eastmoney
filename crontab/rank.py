@@ -110,6 +110,71 @@ class rank(object):
                 self.Model.update_One(sql)
             page = page + 1
 
+    def save_lhb_list(self):
+        updated = datetime.date.today()
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
+
+        page = 0
+        limit = 100
+        is_stop = True
+        while is_stop:
+            data = self.Model.getAll("SELECT * FROM daily_lhb WHERE updated = '{}' LIMIT {},{}".format(updated, limit * page, limit))
+            page = page + 1
+            print(len(data))
+            for stock_row in data:
+                print(stock_row['code'])
+                buy_list = self.east.get_lhb_buy(stock_row['code'], updated, False)
+                for buy_row in buy_list:
+                    sql = """INSERT INTO daily_lhb_list
+                                           (`code`, `updated`, `department_code`, `department_name`, `net`, `buy`, `sell`, `is_buy`)
+                                           VALUE('{}','{}','{}','{}','{}','{}','{}','{}') 
+                                      ON DUPLICATE KEY UPDATE 
+                                           code = VALUES( code ),
+                                           updated = VALUES( updated ),
+                                           department_code = VALUES( department_code ),
+                                           department_name = VALUES( department_name ),
+                                           net = VALUES( net ),
+                                           buy = VALUES( buy ),
+                                           sell = VALUES( sell ),
+                                           is_buy = VALUES( is_buy )
+                                   """.format(stock_row['code'],
+                                              updated,
+                                              buy_row['department_code'],
+                                              buy_row['department_name'],
+                                              buy_row['net'],
+                                              buy_row['buy'],
+                                              buy_row['sell'],
+                                              1)
+                    self.Model.update_One(sql)
+                sell_list = self.east.get_lhb_sell(stock_row['code'], updated, False)
+                for sell_row in sell_list:
+                    sql = """INSERT INTO daily_lhb_list
+                                           (`code`, `updated`, `department_code`, `department_name`, `net`, `buy`, `sell`, `is_buy`)
+                                           VALUE('{}','{}','{}','{}','{}','{}','{}','{}') 
+                                      ON DUPLICATE KEY UPDATE 
+                                           code = VALUES( code ),
+                                           updated = VALUES( updated ),
+                                           department_code = VALUES( department_code ),
+                                           department_name = VALUES( department_name ),
+                                           net = VALUES( net ),
+                                           buy = VALUES( buy ),
+                                           sell = VALUES( sell ),
+                                           is_buy = VALUES( is_buy )
+                                   """.format(stock_row['code'],
+                                              updated,
+                                              sell_row['department_code'],
+                                              sell_row['department_name'],
+                                              sell_row['net'],
+                                              sell_row['buy'],
+                                              sell_row['sell'],
+                                              0)
+                    self.Model.update_One(sql)
+
+            if len(data) < limit:
+                print('over')
+                sys.exit()
 
 def init():
     return rank()

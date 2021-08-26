@@ -6,15 +6,17 @@ import decimal
 import time
 import random
 import sys
+import hashlib
 
 class east_web(object):
 
-    _t = '1624089279383'
+    _t = '0014416471786912188'
     delay_min = 1
     delay_max = 3
 
     def __init__(self):
-        self._t = round(time.time()*1000)
+        #self._t = round(time.time()*1000)
+        pass
 
     def delay_sleep(self):
         delay = random.uniform(self.delay_min, self.delay_max)
@@ -308,6 +310,75 @@ class east_web(object):
 
         self._get('自选', stock_url, 'f14,f12,f2,f3:0:%')
 
+    def get_lhb_buy(self,code='000758',trade_date='2021-08-25',is_print=True):
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_BILLBOARD_DAILYDETAILSBUY&sty=EXPLANATION,CHANGE_TYPE,OPERATEDEPT_CODE,OPERATEDEPT_NAME,TRADE_DATE,NET,BUY,SELL,RISE_PROBABILITY_3DAY,TOTAL_BUYER_SALESTIMES_3DAY,OPERATEDEPT_CODE_OLD&callback=&extraCols=&filter=(SECURITY_CODE=%22{}%22)(TRADE_DATE=%27{}%27)&p=1&ps=200&sr=-1&st=BUY&token=&var=&source=DataCenter&client=WAP&?v={}' \
+            .format(code,trade_date,self._t)
+        result = self.__curl(url)
+        data = result['result']['data']
+        repeat_list = []
+        result_data = []
+        for row in data:
+            if 'BUY' not in row:
+                row['BUY'] = 0
+            if 'SELL' not in row:
+                row['SELL'] = 0
+            md5 = self.__md5([row['OPERATEDEPT_NAME'], row['OPERATEDEPT_CODE'], row['NET'], row['BUY'], row['SELL']])
+            if md5 in repeat_list:
+                continue
+            if is_print:
+                str = '{}|{}|{}|{}|{}' \
+                    .format(row['OPERATEDEPT_NAME'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
+                            row['OPERATEDEPT_CODE'],
+                            self._field_type(row['NET'], 4, '万'),
+                            self._field_type(row['BUY'], 4, '万'),
+                            self._field_type(row['SELL'], 4, '万'))
+                repeat_list.append(md5)
+                print(str)
+            else:
+                result_data.append(
+                    {'department_code' : row['OPERATEDEPT_NAME'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
+                     'department_name' : row['OPERATEDEPT_CODE'],
+                     'net' : row['NET'],
+                     'buy' : row['BUY'],
+                     'sell' : row['SELL']})
+
+        if is_print != True:
+            return result_data
+
+    def get_lhb_sell(self,code='600172', trade_date='2021-08-25',is_print=True):
+        url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_BILLBOARD_DAILYDETAILSSELL&sty=EXPLANATION,CHANGE_TYPE,OPERATEDEPT_CODE,OPERATEDEPT_NAME,TRADE_DATE,NET,BUY,SELL,RISE_PROBABILITY_3DAY,TOTAL_BUYER_SALESTIMES_3DAY,OPERATEDEPT_CODE_OLD&callback=&extraCols=&filter=(SECURITY_CODE=%22{}%22)(TRADE_DATE=%27{}%27)&p=1&ps=200&sr=-1&st=SELL&token=&var=&source=DataCenter&client=WAP&v={}' \
+            .format(code, trade_date, self._t)
+        result = self.__curl(url)
+        data = result['result']['data']
+        repeat_list = []
+        result_data = []
+        for row in data:
+            if 'BUY' not in row:
+                row['BUY'] = 0
+            if 'SELL' not in row:
+                row['SELL'] = 0
+            md5 = self.__md5([row['OPERATEDEPT_NAME'], row['OPERATEDEPT_CODE'], row['NET'], row['BUY'], row['SELL']])
+            if md5 in repeat_list:
+                continue
+            if is_print:
+                str = '{}|{}|{}|{}|{}' \
+                    .format(row['OPERATEDEPT_NAME'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
+                            row['OPERATEDEPT_CODE'],
+                            self._field_type(row['NET'], 4, '万'),
+                            self._field_type(row['BUY'], 4, '万'),
+                            self._field_type(row['SELL'], 4, '万'))
+                repeat_list.append(md5)
+                print(str)
+            else:
+                result_data.append({'department_code': row['OPERATEDEPT_NAME'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
+                     'department_name': row['OPERATEDEPT_CODE'],
+                     'net': row['NET'],
+                     'buy': row['BUY'],
+                     'sell': row['SELL']})
+
+        if is_print != True:
+            return result_data
+
     def __post(self, url, content_text):
         data = json.dumps(content_text)
         data = bytes(data, 'utf8')
@@ -388,3 +459,9 @@ class east_web(object):
         html = res.read().decode('utf8')
         data = json.loads(html)
         return data
+
+    # 处理MD5
+    def __md5(self,data):
+        m = hashlib.md5()
+        m.update(str(data).encode(encoding='UTF-8'))
+        return m.hexdigest()
