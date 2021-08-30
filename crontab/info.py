@@ -8,6 +8,7 @@ from config import Config
 import sys
 import datetime
 from chinese_calendar import is_workday, is_holiday
+import lib.public as public
 
 class info(object):
 
@@ -308,6 +309,19 @@ class info(object):
 
     def hot_top(self,limit = 10):
         pass
+
+    def bk_info(self,params):
+        param_args = public.format_params(params)
+        sql = """
+            SELECT 
+                *
+            FROM bk
+                order by {} {}  
+            limit {}
+        """.format(param_args['f'],param_args['o'],param_args['l'])
+        data = self.Model.getAll(sql)
+        for row in data[::-1]:
+            print('{}|{}|{}%|{}%'.format(row['bk_code'],row['bk_name'],row['rate'],row['rate_3']))
 
 def init():
     return info()

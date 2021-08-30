@@ -314,7 +314,11 @@ class east_web(object):
         url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_BILLBOARD_DAILYDETAILSBUY&sty=EXPLANATION,CHANGE_TYPE,OPERATEDEPT_CODE,OPERATEDEPT_NAME,TRADE_DATE,NET,BUY,SELL,RISE_PROBABILITY_3DAY,TOTAL_BUYER_SALESTIMES_3DAY,OPERATEDEPT_CODE_OLD&callback=&extraCols=&filter=(SECURITY_CODE=%22{}%22)(TRADE_DATE=%27{}%27)&p=1&ps=200&sr=-1&st=BUY&token=&var=&source=DataCenter&client=WAP&?v={}' \
             .format(code,trade_date,self._t)
         result = self.__curl(url)
-        data = result['result']['data']
+        try:
+            data = result['result']['data']
+        except Exception as e:
+            print(result, e)
+            return []
         repeat_list = []
         result_data = []
         for row in data:
@@ -345,11 +349,15 @@ class east_web(object):
         if is_print != True:
             return result_data
 
-    def get_lhb_sell(self,code='600172', trade_date='2021-08-25',is_print=True):
+    def get_lhb_sell(self,code='600266', trade_date='2021-08-27',is_print=True):
         url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_BILLBOARD_DAILYDETAILSSELL&sty=EXPLANATION,CHANGE_TYPE,OPERATEDEPT_CODE,OPERATEDEPT_NAME,TRADE_DATE,NET,BUY,SELL,RISE_PROBABILITY_3DAY,TOTAL_BUYER_SALESTIMES_3DAY,OPERATEDEPT_CODE_OLD&callback=&extraCols=&filter=(SECURITY_CODE=%22{}%22)(TRADE_DATE=%27{}%27)&p=1&ps=200&sr=-1&st=SELL&token=&var=&source=DataCenter&client=WAP&v={}' \
             .format(code, trade_date, self._t)
         result = self.__curl(url)
-        data = result['result']['data']
+        try:
+            data = result['result']['data']
+        except Exception as e:
+            print(result,e)
+            return []
         repeat_list = []
         result_data = []
         for row in data:
