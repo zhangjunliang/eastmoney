@@ -69,7 +69,7 @@ class east_web(object):
             .format(self._t)
         self._get('指数',url,'f14,f2,f3:0:%,f6:8:亿,f62:0:')
 
-    def get_bk(self, page = 1,limit = 8 ,fields = 'f14,f12,f3,f128,f140,f136' ,is_print = True):
+    def get_bk(self, page = 1,limit = 10 ,fields = 'f14,f12,f3,f128,f140,f136' ,is_print = True):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127&_={}'\
             .format(str(page),str(limit),self._t)
         #print(url)
@@ -340,8 +340,8 @@ class east_web(object):
                 print(str)
             else:
                 result_data.append(
-                    {'department_code' : row['OPERATEDEPT_NAME'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
-                     'department_name' : row['OPERATEDEPT_CODE'],
+                    {'department_code' : row['OPERATEDEPT_CODE'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
+                     'department_name' : row['OPERATEDEPT_NAME'],
                      'net' : row['NET'],
                      'buy' : row['BUY'],
                      'sell' : row['SELL']})
@@ -378,8 +378,8 @@ class east_web(object):
                 repeat_list.append(md5)
                 print(str)
             else:
-                result_data.append({'department_code': row['OPERATEDEPT_NAME'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
-                     'department_name': row['OPERATEDEPT_CODE'],
+                result_data.append({'department_code': row['OPERATEDEPT_CODE'].replace('中国', '').replace('证券股份有限公司', '').replace('股份有限公司', ''),
+                     'department_name': row['OPERATEDEPT_NAME'],
                      'net': row['NET'],
                      'buy': row['BUY'],
                      'sell': row['SELL']})
@@ -418,6 +418,7 @@ class east_web(object):
     def dump(self,data,tags = ''):
         if len(tags) > 0:
             print('{}----------'.format(tags))
+        #data = data[::-1]
         for row in data:
             if type(row) != list:
                 print('|'.join(str(i) for i in data))

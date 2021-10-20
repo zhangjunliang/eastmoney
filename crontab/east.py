@@ -30,7 +30,8 @@ class east(object):
     def code(self,code):
         info = self.Model.getOne("select * from stock where code = '{}'".format(code))
         secid = '{}.{}'.format(info['market'], info['code'])
-        data = self.east_web.get_info(secid, 'f57,f43:2:,f170:2:%,f40:4:,f20:4:')
+        #f57,
+        data = self.east_web.get_info(secid, 'f43:2:,f170:2:%,f40:4:,f20:4:')
         self.east_web.dump(data)
 
     def one(self,code):
@@ -52,7 +53,8 @@ class east(object):
         self.east_web.dump([],'my')
         for row in data:
             secid = '{}.{}'.format(row['market'],row['code'])
-            data = self.east_web.get_info(secid, 'f57,f43:2:,f170:2:%,f40:4:,f20:4:')
+            #'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
+            data = self.east_web.get_info(secid, 'f170:2:,f40:4:,f20:4:')
             self.east_web.dump(data)
 
     def top(self):
