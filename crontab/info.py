@@ -310,15 +310,14 @@ class info(object):
     def hot_top(self,limit = 10):
         pass
 
-    def bk_info(self,params):
-        param_args = public.format_params(params)
+    def bk_info(self):
         sql = """
             SELECT 
                 *
             FROM bk
                 order by {} {}  
             limit {}
-        """.format(param_args['f'],param_args['o'],param_args['l'])
+        """.format(public.get('fields'),public.get('order'),public.get('limit'))
         data = self.Model.getAll(sql)
         for row in data[::-1]:
             print('{}|{}|{}%|{}%'.format(row['bk_code'],row['bk_name'],row['rate'],row['rate_3']))

@@ -30,6 +30,26 @@ class stock(object):
                 return
             print('|'.join(str(i) for i in row))
 
+    def last(self):
+        updated = datetime.date.today()
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
+        with open('last.log', 'r+', encoding="utf-8") as f:
+            last_tag = f.read()
+            if last_tag == '' or last_tag != str(updated):
+                f.write(str(updated))
+                sql1 = "UPDATE stock SET top_num = top_num +1,low_num = 0  WHERE rate > 0"
+                sql2 = "UPDATE stock SET low_num = low_num +1,top_num = 0  WHERE rate < 0"
+                sql3 = "UPDATE stock SET top_num = 0,low_num = 0  WHERE rate = 0"
+                self.Model.update_One(sql1)
+                self.Model.update_One(sql2)
+                self.Model.update_One(sql3)
+                print("last ok")
+            else:
+                print("last no")
+            f.close()
+
     ## 保存所有股票信息
     def save_stock(self):
         updated = datetime.date.today()
@@ -48,6 +68,7 @@ class stock(object):
             try:
                 result = self.east._get('all', url, 'f14,f12,f13,f2,f3',is_print=False)
             except TypeError as e:
+                self.last()
                 print(repr(e))
                 print('over')
                 sys.exit()
@@ -66,6 +87,8 @@ class stock(object):
                 """.format(row[0], row[1], row[2], row[3], row[4])
                 self.Model.update_One(sql)
             page = page + 1
+
+
 
     def save_stock_bk(self):
 

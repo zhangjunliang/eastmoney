@@ -4,6 +4,7 @@ import importlib
 import sys
 import time
 import argparse
+import lib.public as public
 from apscheduler.schedulers.background import BackgroundScheduler
 
 parser = argparse.ArgumentParser(description='run east')
@@ -11,10 +12,18 @@ parser.add_argument('-o', type=str, required=True, help='obj')
 parser.add_argument('-f', type=str, required=True, default='', help='fun')
 parser.add_argument('-p', default=None, help='params')
 parser.add_argument('-t', default=0, help='jump')
+parser.add_argument('-page', default=1, help='page')
+parser.add_argument('-limit', default=10, help='limit')
+parser.add_argument('-fields', default='id', help='fields')
+parser.add_argument('-order', default='desc', help='order')
 
 args = parser.parse_args()
 
-# print(args)
+public.init()
+public.set('page',args.page)
+public.set('limit',args.limit)
+public.set('fields',args.fields)
+public.set('order',args.order)
 
 obj = importlib.import_module('crontab.{}'.format(args.o),args.o)
 

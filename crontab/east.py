@@ -50,11 +50,12 @@ class east(object):
             sql = "select * from stock where weight > {} order by weight".format(weight)
 
         data = self.Model.getAll(sql)
-        self.east_web.dump([],'my')
+        self.east_web.dump([],'')
         for row in data:
             secid = '{}.{}'.format(row['market'],row['code'])
-            #'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
-            data = self.east_web.get_info(secid, 'f170:2:,f40:4:,f20:4:')
+            f = 'f170:2:,f40:4:,f20:4:'
+            f = 'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
+            data = self.east_web.get_info(secid, f)
             self.east_web.dump(data)
 
     def top(self):
