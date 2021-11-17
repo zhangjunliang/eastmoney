@@ -35,20 +35,26 @@ class stock(object):
         if is_workday(updated) == False:
             print('Error:{} not work...'.format(updated))
             return
-        with open('last.log', 'r+', encoding="utf-8") as f:
-            last_tag = f.read()
-            if last_tag == '' or last_tag != str(updated):
-                f.write(str(updated))
-                sql1 = "UPDATE stock SET top_num = top_num +1,low_num = 0  WHERE rate > 0"
-                sql2 = "UPDATE stock SET low_num = low_num +1,top_num = 0  WHERE rate < 0"
-                sql3 = "UPDATE stock SET top_num = 0,low_num = 0  WHERE rate = 0"
-                self.Model.update_One(sql1)
-                self.Model.update_One(sql2)
-                self.Model.update_One(sql3)
-                print("last ok")
-            else:
-                print("last no")
-            f.close()
+        f1 = open('last.log', 'a+', encoding="utf-8")
+        f1.seek(0)
+        last_tag = f1.read()
+        f1.close()
+
+        if last_tag == '' or last_tag != str(updated):
+            f2 = open('last.log', 'w', encoding="utf-8")
+            f2.write(str(updated))
+            f2.close()
+            sql1 = "UPDATE stock SET last_num = IF(last_num > 0,last_num + 1,1) WHERE rate > 0"
+            sql2 = "UPDATE stock SET last_num = IF(last_num < 0,last_num - 1,-1) WHERE rate < 0"
+            sql3 = "UPDATE stock SET last_num = IF(last_num > 0,last_num + 1,last_num -1) WHERE rate = 0 AND last_num != 0"
+
+            self.Model.update_One(sql1)
+            self.Model.update_One(sql2)
+            self.Model.update_One(sql3)
+            print("last ok")
+        else:
+            print("last no")
+
 
     ## 保存所有股票信息
     def save_stock(self):
