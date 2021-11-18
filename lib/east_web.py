@@ -439,12 +439,8 @@ class east_web(object):
 
     def _field_type(self, val, val_type, tags='%'):
         if type(val) == float or type(val) == int:
-            if val_type == 2:
-                val = '{}{}'.format(decimal.Decimal(val / 100).quantize(decimal.Decimal('0.00')), tags)
-            elif val_type == 4:
-                val = '{}{}'.format(decimal.Decimal(val / 10000).quantize(decimal.Decimal('0.00')), tags)
-            elif val_type == 8:
-                val = '{}{}'.format(decimal.Decimal(val / 100000000).quantize(decimal.Decimal('0.00')), tags)
+            if val_type > 0:
+                val = '{}{}'.format(decimal.Decimal(val / (10 ** val_type) ).quantize(decimal.Decimal('0.00')), tags)
             else:
                 val = '{}{}'.format(val, tags)
         return val

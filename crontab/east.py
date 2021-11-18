@@ -27,6 +27,12 @@ class east(object):
                 return
             print('|'.join(str(i) for i in row))
 
+    def kzc_code(self,code):
+        secid = code
+        #f57,
+        data = self.east_web.get_info(secid, 'f43:3:,f170:2:%,f40:4:,f20:4:')
+        self.east_web.dump(data)
+
     def code(self,code):
         info = self.Model.getOne("select * from stock where code = '{}'".format(code))
         secid = '{}.{}'.format(info['market'], info['code'])
