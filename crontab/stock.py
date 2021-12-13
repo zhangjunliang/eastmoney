@@ -44,9 +44,9 @@ class stock(object):
             f2 = open('last.log', 'w', encoding="utf-8")
             f2.write(str(updated))
             f2.close()
-            sql1 = "UPDATE stock SET last_num = IF(last_num > 0,last_num + 1,1) WHERE rate > 0"
-            sql2 = "UPDATE stock SET last_num = IF(last_num < 0,last_num - 1,-1) WHERE rate < 0"
-            sql3 = "UPDATE stock SET last_num = IF(last_num > 0,last_num + 1,last_num -1) WHERE rate = 0 AND last_num != 0"
+            sql1 = "UPDATE stock SET last_num = IF(last_num > 0,last_num + 1,1) WHERE rate > 0 and price != 0"
+            sql2 = "UPDATE stock SET last_num = IF(last_num < 0,last_num - 1,-1) WHERE rate < 0 and price != 0"
+            sql3 = "UPDATE stock SET last_num = IF(last_num > 0,last_num + 1,last_num -1) WHERE rate = 0 AND last_num != 0 and price != 0"
 
             self.Model.update_One(sql1)
             self.Model.update_One(sql2)
