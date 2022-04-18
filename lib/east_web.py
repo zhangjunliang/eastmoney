@@ -8,6 +8,7 @@ import random
 import sys
 import hashlib
 import lib.public as public
+import requests
 
 
 class east_web(object):
@@ -35,6 +36,58 @@ class east_web(object):
                             not m.startswith("dump") and
                             not m.startswith("methods") and
                             callable(getattr(self, m)), dir(self))))
+
+    # 获取基金信息
+    def get_fund(self, secid, fields='f43'):
+        return self.get_info(secid, fields)
+
+    def get_fund_top(self):
+        fields = 'SECURITY_NAME_ABBR,SECURITY_CODE,CHANGE_RATE,NEW_PRICE'
+        self.get_fund_list(p=self.pageNo,ps=self.pageSize,sort_str = '-1,-1,1',fields = fields,is_print=True)
+
+    def get_fund_low(self):
+        fields = 'SECURITY_NAME_ABBR,SECURITY_CODE,CHANGE_RATE,NEW_PRICE'
+        self.get_fund_list(p=self.pageNo,ps=self.pageSize,sort_str = '1,1,1',fields = fields,is_print=True)
+
+    def get_fund_top_t0(self):
+        fields = 'SECURITY_NAME_ABBR,SECURITY_CODE,CHANGE_RATE,NEW_PRICE'
+        self.get_fund_list(p=self.pageNo, ps=self.pageSize,filter='(ETF_TYPE_CODE%3D%22ALL%22)(IS_TPLUS%3D%221%22)', sort_str='-1,-1,1', fields=fields, is_print=True)
+
+    def get_fund_low_t0(self):
+        fields = 'SECURITY_NAME_ABBR,SECURITY_CODE,CHANGE_RATE,NEW_PRICE'
+        self.get_fund_list(p=self.pageNo, ps=self.pageSize,filter='(ETF_TYPE_CODE%3D%22ALL%22)(IS_TPLUS%3D%221%22)', sort_str='1,1,1', fields=fields, is_print=True)
+
+    # 获取基金列表
+    def get_fund_list(self, p = 1, ps = 1, filter='(ETF_TYPE_CODE%3D%22ALL%22)',sort_str = '-1,-1,1', fields='SECURITY_NAME_ABBR,SECURITY_CODE,CHANGE_RATE,NEW_PRICE,SECUCODE,IS_TPLUS',is_print = False):
+        url = 'https://datacenter.eastmoney.com/stock/fundselector/api/data/get?type=RPTA_APP_FUNDSELECT&sty=IS_TPLUS,SECUCODE,SECURITY_CODE,CHANGE_RATE_1W,CHANGE_RATE_1M,CHANGE_RATE_3M,YTD_CHANGE_RATE,DEC_TOTALSHARE,DEC_NAV,SECURITY_NAME_ABBR,DERIVE_INDEX_CODE,INDEX_CODE,INDEX_NAME,NEW_PRICE,CHANGE_RATE,CHANGE,VOLUME,DEAL_AMOUNT,PREMIUM_DISCOUNT_RATIO,QUANTITY_RELATIVE_RATIO,HIGH_PRICE,LOW_PRICE,STOCK_ID&extraCols=&source=FUND_SELECTOR&client=APP&filter={}&p={}&ps={}&st=CHANGE_RATE,CHANGE,SECURITY_CODE&sr={}'.\
+            format(filter,p,ps,sort_str)
+
+        data = self.__curl(url)
+        data_list = data['result']['data']
+        result = []
+        for row in data_list:
+            if type(row) == str:
+                row = data_list[row]
+            secucode= row['SECUCODE'].split('.')[1]
+            if secucode == 'SH':
+                row['SECUCODE'] = 1
+            elif secucode == 'SZ':
+                row['SECUCODE'] = 0
+            else:
+                print(row['SECUCODE'])
+                sys.exit('error market')
+
+            if fields == '':
+                item = row
+            else:
+                item = self._field(fields, row)
+
+            result.append(item)
+
+        if is_print:
+            self.dump(result)
+        else:
+            return result
 
     # 获取股票信息
     def get_info(self, secid, fields='f43'):
@@ -397,6 +450,52 @@ class east_web(object):
         if is_print != True:
             return result_data
 
+    def get_lottery(self, name = 'ssq',issueCount = 1, is_print = True):
+        #3d
+        url = 'http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice?name={}&issueCount={}&issueStart=&issueEnd=&dayStart=&dayEnd=' \
+            .format(name,issueCount)
+        res = requests.get(url,headers={}, timeout=30)
+        html = res.content
+        data = json.loads(html)
+        if data['state'] == 0:
+            result = []
+            for i in data['result']:
+                red_list = i['red'].split(',')
+                item = {}
+                item['type'] = name
+                item['name'] = i['name']
+                item['code'] = i['code']
+                item['date'] = i['date'][0:10]
+                item['week'] = i['week']
+                item['red1'] = int(red_list[0])
+                item['red2'] = int(red_list[1])
+                item['red3'] = int(red_list[2])
+                item['red4'] = int(red_list[3])
+                item['red5'] = int(red_list[4])
+                item['red6'] = int(red_list[5])
+                item['blue1'] = int(i['blue'])
+                item['blue2'] = 0 if i['blue2'] == '' else i['blue2']
+                result.append(item)
+            if is_print:
+                for row in result:
+                    print("{}|{}|{}|{}|{},{},{},{},{},{}|{}".format(
+                        row['name'],
+                        row['code'],
+                        row['date'],
+                        row['week'],
+                        row['red1'],
+                        row['red2'],
+                        row['red3'],
+                        row['red4'],
+                        row['red5'],
+                        row['red6'],
+                        row['blue1']
+                    ))
+            else:
+                return result
+        else:
+            return False
+
     def __post(self, url, content_text):
         data = json.dumps(content_text)
         data = bytes(data, 'utf8')
@@ -438,7 +537,12 @@ class east_web(object):
     def _field_type(self, val, val_type, tags='%'):
         if type(val) == float or type(val) == int:
             if val_type > 0:
-                val = '{}{}'.format(decimal.Decimal(val / (10 ** val_type) ).quantize(decimal.Decimal('0.00')), tags)
+                if val_type == 3:
+                    quantize_str = '0.000'
+                else:
+                    quantize_str = '0.00'
+
+                val = '{}{}'.format(decimal.Decimal(val / (10 ** val_type) ).quantize(decimal.Decimal(quantize_str)), tags)
             else:
                 val = '{}{}'.format(val, tags)
         return val
@@ -480,3 +584,4 @@ class east_web(object):
         m = hashlib.md5()
         m.update(str(data).encode(encoding='UTF-8'))
         return m.hexdigest()
+

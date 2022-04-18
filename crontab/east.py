@@ -40,6 +40,13 @@ class east(object):
         data = self.east_web.get_info(secid, 'f43:2:,f170:2:%,f40:4:,f20:4:')
         self.east_web.dump(data)
 
+    def fund(self,code = '159707'):
+        info = self.Model.getOne("select * from stock where code = '{}'".format(code))
+        secid = '{}.{}'.format(info['market'], info['code'])
+        #f57,
+        data = self.east_web.get_fund(secid, 'f43:3:,f170:2:%,f40:4:,f20:4:')
+        self.east_web.dump(data)
+
     def one(self,code):
         info = self.Model.getOne("select * from stock where code = '{}'".format(code))
         secid = '{}.{}'.format(info['market'], info['code'])
@@ -59,9 +66,16 @@ class east(object):
         self.east_web.dump([],'')
         for row in data:
             secid = '{}.{}'.format(row['market'],row['code'])
-            f = 'f170:2:,f40:4:,f20:4:'
-            f = 'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
-            data = self.east_web.get_info(secid, f)
+
+            if row['type'] == 1:
+                f = 'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
+                data = self.east_web.get_info(secid, f)
+            elif row['type'] == 2:
+                f = 'f57,f43:3:,f170:2:%,f40:4:,f20:4:'
+                data = self.east_web.get_fund(secid, f)
+            else:
+                data = []
+
             self.east_web.dump(data)
 
     def top(self):

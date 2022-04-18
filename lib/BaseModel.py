@@ -46,11 +46,11 @@ class BaseModel(object):
 
 
     # 插入更新一条
-    def update_One(self, sql):
+    def update_One(self, sql,data = []):
         self.is_connected()
-        self.cursor.execute(sql)
+        r = self.cursor.execute(sql,data)
         self.conn.commit()
-        return
+        return r
 
 
     # 插入更新多条

@@ -89,12 +89,62 @@ class stock(object):
 
                 sql = """
                     INSERT INTO stock(name,code,market,price,rate) VALUE('{}','{}','{}','{}','{}') ON DUPLICATE KEY UPDATE 
-                    code = VALUES( code ),name = VALUES( name ),market = VALUES( market ),price = VALUES( price ),rate = VALUES( rate )
+                    name = VALUES( name ),
+                    code = VALUES( code ),
+                    market = VALUES( market ),
+                    price = VALUES( price ),
+                    rate = VALUES( rate )
                 """.format(row[0], row[1], row[2], row[3], row[4])
                 self.Model.update_One(sql)
             page = page + 1
 
+    ## 保存所有基金信息
+    def save_fund(self):
+        updated = datetime.date.today()
+        if is_workday(updated) == False:
+            print('Error:{} not work...'.format(updated))
+            return
 
+        print('start')
+        page = 1
+        while True:
+            self.east.delay_sleep()
+            num = 100
+            try:
+                result = self.east.get_fund_list(p=page,ps=num)
+            except TypeError as e:
+                self.last()
+                print(repr(e))
+                print('over')
+                sys.exit()
+            except Exception as e:
+                continue
+
+            print('page {}:{}'.format(page, len(result)))
+
+            if len(result) < 1:
+                sys.exit()
+
+            for row in result:
+                item_row = {
+                    'name': row[0],
+                    'type': 2,
+                    'code': row[1],
+                    'market': row[4],
+                    'price': row[3],
+                    'rate': row[2],
+                    'is_t0': row[5]
+                }
+                field_str = '`,`'.join(str(i) for i in item_row)
+                field_val = ','.join('%s' for i in item_row)
+                field_data = list(item_row[i] for i in item_row)
+                field_update = ','.join(' {}=VALUES({}) '.format(str(i),str(i)) for i in item_row)
+                sql = """
+                    INSERT INTO stock(`{}`) VALUE({}) ON DUPLICATE KEY UPDATE {}
+                """.format(field_str,field_val,field_update)
+                self.Model.update_One(sql,field_data)
+
+            page = page + 1
 
     def save_stock_bk(self):
 
