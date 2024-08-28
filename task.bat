@@ -1,4 +1,4 @@
-cd C:\work\work_py\eastmoney
+cd C:\work\private\eastmoney
 python run.py -o=bk -f=save_bk
 python run.py -o=stock -f=save_stock
 python run.py -o=stock -f=save_daily_top

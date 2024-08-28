@@ -69,6 +69,7 @@ class east(object):
 
             if row['type'] == 1:
                 f = 'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
+                f = 'f43:2:,f170:2:%,f40:4:,f20:4:'
                 data = self.east_web.get_info(secid, f)
             elif row['type'] == 2:
                 f = 'f57,f43:3:,f170:2:%,f40:4:,f20:4:'

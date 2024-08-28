@@ -9,6 +9,7 @@ import sys
 import hashlib
 import lib.public as public
 import requests
+from DrissionPage import ChromiumPage, ChromiumOptions
 
 
 class east_web(object):
@@ -573,11 +574,49 @@ class east_web(object):
             item.append(val)
         return item
 
-    def __curl(self, url):
+    def __curl_old(self, url):
         res = urllib.request.urlopen(url, timeout=10)
         html = res.read().decode('utf8')
         data = json.loads(html)
         return data
+
+    def init_browser(self):
+
+        CHROME_PORT = 10001
+
+        co = ChromiumOptions().set_paths(local_port=CHROME_PORT)
+
+        # if SPIDER_ENV == 'dev':
+        #     proxy_ip = '127.0.0.1:10809'
+        # elif SPIDER_ENV == 'prod':
+        #     proxy_ip = get_proxy()
+        #
+        # co.set_proxy('http://{}'.format(proxy_ip))
+
+        # 无头模式
+        co.set_argument("--headless")
+        # 无痕模式
+        co.set_argument("--incognito")
+        # 禁用密码保存提示
+        co.set_argument("--disable-save-password-bubble")
+        # 禁用信息栏
+        # co.set_argument("--disable-infobars")
+        # 禁用插件和扩展
+        co.set_argument("--disable-plugins-discovery")
+        co.set_argument("--disable-extensions")
+        # 禁用GPU加速
+        co.set_argument("--disable-gpu")
+        # 关闭沙盒模式
+        co.set_argument("--disable-sandbox")
+        co.set_argument("--disable-dev-shm-usage")
+
+        # 用该配置创建页面对象
+        self.browser = ChromiumPage(addr_driver_opts=co)
+
+    def __curl(self, url):
+        self.init_browser()
+        self.browser.get(url)
+        return self.browser.json
 
     # 处理MD5
     def __md5(self, data):

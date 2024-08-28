@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding=UTF-8 -*-
+import sys
+
 import pymysql
 
 class BaseModel(object):
