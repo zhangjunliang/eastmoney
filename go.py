@@ -116,7 +116,10 @@ while True:  # 创建一个无限循环
 
     task_list = ['{}:{}'.format(k,task[k]['name']) for k in task]
 
-    user_input = input(str(task_list) + "\n")
+    msg = str(task_list)
+    msg = ''
+
+    user_input = input( msg + "\n")
     try:
         if user_input.lower() == 'exit':  # 检查用户是否想要退出
             print("退出程序。")
@@ -128,6 +131,18 @@ while True:  # 创建一个无限循环
                 break
             else:
                 os.system(task[number]['task'])
+        else:
+            inputs = user_input.split(' ')
+            if len(inputs) == 2:
+                number = int(inputs[0])
+                page = int(inputs[1])
+                os.system('{} -page={}'.format(task[number]['task'],page))
+            elif len(inputs) == 3:
+                number = int(inputs[0])
+                page = int(inputs[1])
+                limit = int(inputs[2])
+                os.system('{} -page={} -limit={}'.format(task[number]['task'],page,limit))
+
     except Exception as e:
         print("error:{}".format(e))
 
