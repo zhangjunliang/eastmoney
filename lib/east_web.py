@@ -98,6 +98,88 @@ class east_web(object):
         data = result['data']
         return self._field(fields, data)
 
+    # 获取股票日金额
+    def get_day_info(self,secid):
+        url = ('https://push2his.eastmoney.com/api/qt/stock/kline/get?secid={}&klt=101&fqt=1&lmt=66&end=20500000&iscca=1&fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1'\
+               .format(secid))
+        result = self.__curl(url)
+        data = result['data']['klines']
+        data_days = []
+        for item in list(reversed(data)):
+            item_val = item.split(',')
+            data_days.append(item_val)
+        return data_days
+
+    def get_days_info(self,secid,data = None):
+        if data == None:
+            data = self.get_day_info(secid)
+        num5 = 5
+        num10 = 10
+        num20 = 20
+
+        price5 = round(sum([float(i[2]) for i in data[0:num5]]) / num5,2)
+        price10 = round(sum([float(i[2]) for i in data[0:num10]]) / num10, 2)
+        price20 = round(sum([float(i[2]) for i in data[0:num20]]) / num20, 2)
+
+        rate5 = round(sum([float(i[8]) for i in data[0:num5]]) / num5, 2)
+        rate10 = round(sum([float(i[8]) for i in data[0:num10]]) / num10, 2)
+        rate20 = round(sum([float(i[8]) for i in data[0:num20]]) / num20, 2)
+
+        days_rate = [float(i[8]) for i in data[0:num20]]
+        rate_max = max(days_rate)
+        rate_min = min(days_rate)
+
+        price = float(data[0][2])
+        rate = float(data[0][8])
+
+        price_avg = round(sum(list([price5,price10,price20])) / 3,2)
+        price_diff = round(price - price_avg,2)
+
+        rate_avg = round(sum(list([rate5, rate10, rate20])) / 3, 2)
+        rate_diff = round(sum(list([abs(rate_max), abs(rate_min)])) / 2, 2)
+        rate_yq = round(rate_diff/2, 2)
+
+        rate_diff_avg = round((price - price_avg)/price * 100, 4)
+
+        is_yq = 0
+        if abs(rate_avg) <=  0.2 and rate_diff > 3 and rate_diff < 8:
+            if rate > 0 and rate >= rate_yq:
+                # 卖出信号
+                is_yq = 2
+            elif rate < 0 and rate <= rate_avg * -1:
+                #买入信号
+                is_yq = 1
+            else:
+                # 持有
+                is_yq = 3
+        elif rate > 5:
+            # 突破
+            is_yq = 10
+        elif rate < -5:
+            # 加速下跌
+            is_yq = 11
+        else:
+            #未建模
+            is_yq = 12
+
+        result = {
+            'price5':price5,
+            'price10': price10,
+            'price20': price20,
+            'price_avg': price_avg,
+            'price_diff': price_diff,
+            'rate': rate,
+            'rate_max': rate_max,
+            'rate_min': rate_min,
+            'rate_avg': rate_avg,
+            'rate_diff': rate_diff,
+            'rate_diff_avg': rate_diff_avg,
+            'rate_yq': rate_yq,
+            'is_yq': is_yq
+        }
+        return result
+
+
     # 获取股票的板块信息
     def get_stock_bk(self, code, fields):
         url = 'https://push2.eastmoney.com/api/qt/slist/get?ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&spt=3&fields=f1,f12,f152,f3,f14,f128,f136&pi=0&pn={}&pz={}&po=1&fid=f3&invt=2&secid={}&_={}' \
@@ -254,7 +336,12 @@ class east_web(object):
         code = '1.000001,0.399001,0.399006,1.000688,100.HSI,1.000300,0.399005'
         url = 'https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f1,f2,f3,f4,f6,f12,f13,f14,f62&secids={}&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&_={}' \
             .format(code, self._t)
+
+        # print(url)
         index_data = self.__curl(url)
+
+        # print(index_data['data']['diff'][0])
+        # sys.exit()
         result_001 = index_data['data']['diff'][0]
         result_002 = index_data['data']['diff'][1]
 
@@ -273,22 +360,18 @@ class east_web(object):
                                    self._field_type(result_001['f62'] + result_002['f62'], 8, '亿'))
         print(str003)
         # ---
-        self.get_money()
+        # self.get_money()
         # ---
         url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPTAAA_DMSK_TS_CHANGESTATISTICS&?v={}' \
             .format(self._t)
         data = self.__curl(url)
         result = data['result']['data'][0]
-        str1 = '{}|{}|{}|{}(at)'.format('涨', result['IND1'], result['IND3'], result['IND4'])
-        str2 = '{}|{}|{}|{}(at)'.format('跌', result['IND2'], result['IND5'], result['IND6'])
-        print(str1, str2)
-        print('+5:{}|+1:{}|+0:{}|{}|-0:{}|-1:{}|-5:{}'.format(result['INDEX8'],
-                                                              result['INDEX7'],
-                                                              result['INDEX6'],
-                                                              result['INDEX5'],
-                                                              result['INDEX4'],
-                                                              result['INDEX3'],
-                                                              result['INDEX2']))
+        str1 = '++ {}|{}|{} --'.format( result['IND1'], result['INDEX5'],result['IND2'])
+        print(str1)
+        print('++:{}|+5:{}|+1:{}|+0:{}|{}|-0:{}|-1:{}|-5:{}|{}:--'.format(
+            result['IND3'],result['INDEX8'],result['INDEX7'],result['INDEX6'],
+             result['INDEX5'],
+             result['INDEX4'],result['INDEX3'],result['INDEX2'],result['IND5']))
 
     def get_money(self):
         url = 'https://datacenter.eastmoney.com/securities/api/data/get?type=RPT_MUTUAL_QUOTA&sty=TRADE_DATE,MUTUAL_TYPE,CLOSED_REASON,BOARD_TYPE,MUTUAL_TYPE_NAME,FUNDS_DIRECTION,INDEX_CODE,INDEX_NAME,START_TIME,END_TIME,BOARD_CODE&callback=&extraCols=status%7C07%7CBOARD_CODE,dayNetAmtIn%7C07%7CBOARD_CODE,dayAmtRemain%7C07%7CBOARD_CODE,dayAmtThreshold%7C07%7CBOARD_CODE,f104%7C07%7CBOARD_CODE,f105%7C07%7CBOARD_CODE,f106%7C07%7CBOARD_CODE,f3%7C03%7CINDEX_CODE%7CINDEX_f3,netBuyAmt%7C07%7CBOARD_CODE&filter=&p=1&ps=200&sr=1&st=MUTUAL_TYPE&token=&var=&source=DataCenter&client=APP'
@@ -564,7 +647,6 @@ class east_web(object):
                 field_tags = str(field_data[2])
             except Exception as e:
                 field_tags = ''
-
             val = data[field]
             if field == 'f6' or field == 'f62':
                 val = self._field_type(val, 8, '亿')
@@ -575,14 +657,21 @@ class east_web(object):
         return item
 
     def __curl_old(self, url):
-        res = urllib.request.urlopen(url, timeout=10)
-        html = res.read().decode('utf8')
-        data = json.loads(html)
-        return data
+        attempt = 0
+        retries = 3
+        while attempt < retries:
+            try:
+                res = urllib.request.urlopen(url, timeout=30)
+                html = res.read().decode('utf8')
+                data = json.loads(html)
+                return data
+            except Exception as e:
+                print(e)
+                attempt += 1
 
     def init_browser(self):
 
-        CHROME_PORT = 10001
+        CHROME_PORT = 10002
 
         co = ChromiumOptions().set_paths(local_port=CHROME_PORT)
 
@@ -614,6 +703,7 @@ class east_web(object):
         self.browser = ChromiumPage(addr_driver_opts=co)
 
     def __curl(self, url):
+        return self.__curl_old(url)
         self.init_browser()
         self.browser.get(url)
         return self.browser.json

@@ -6,6 +6,10 @@ import time
 import argparse
 import lib.public as public
 from apscheduler.schedulers.background import BackgroundScheduler
+import warnings
+
+warnings.filterwarnings('ignore')
+
 
 parser = argparse.ArgumentParser(description='run east')
 parser.add_argument('-o', type=str, required=True, help='obj')

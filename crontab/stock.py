@@ -61,7 +61,7 @@ class stock(object):
         updated = datetime.date.today()
         if is_workday(updated) == False:
             print('Error:{} not work...'.format(updated))
-            return
+            # return
 
         print('start')
         page = 1
@@ -87,14 +87,45 @@ class stock(object):
                 if row[4] == '-':
                     row[4] = 0
 
+                secid = '{}.{}'.format(str(row[2]),str(row[1]))
+                print(page,secid)
+                sotck_info = self.east.get_info(secid, 'f57,f43:2:,f116:8:,f117:8:,f170:2:%,f40:4:,f20:4:')
+
+                sotck_days_info = self.east.get_days_info(secid)
+
                 sql = """
-                    INSERT INTO stock(name,code,market,price,rate) VALUE('{}','{}','{}','{}','{}') ON DUPLICATE KEY UPDATE 
+                    INSERT INTO stock(name,code,market,price,market_price,flow_price,rate,
+                    price5,price10,price20,price_avg,price_diff,rate_max,rate_min,rate_avg,rate_diff,rate_diff_avg,rate_yq,is_yq) VALUE(
+                        '{}','{}','{}','{}','{}','{}','{}',
+                        '{}','{}','{}','{}','{}','{}',
+                        '{}','{}','{}','{}','{}','{}'
+                    ) ON DUPLICATE KEY UPDATE 
                     name = VALUES( name ),
                     code = VALUES( code ),
                     market = VALUES( market ),
                     price = VALUES( price ),
-                    rate = VALUES( rate )
-                """.format(row[0], row[1], row[2], row[3], row[4])
+                    market_price = VALUES( market_price ),
+                    flow_price = VALUES( flow_price ),
+                    price5 = VALUES( price5 ),
+                    price10 = VALUES( price10 ),
+                    price20 = VALUES( price20 ),
+                    price_avg = VALUES( price_avg ),
+                    price_diff = VALUES( price_diff ),
+                    rate_max = VALUES( rate_max ),
+                    rate_min = VALUES( rate_min ),
+                    rate_avg = VALUES( rate_avg ),
+                    rate_diff = VALUES( rate_diff ),
+                    rate_diff_avg = VALUES( rate_diff_avg ),
+                    rate_yq = VALUES( rate_yq ),
+                    is_yq = VALUES( is_yq )
+                """.format(row[0], row[1], row[2], row[3], sotck_info[2], sotck_info[3], row[4],
+                    sotck_days_info['price5'],sotck_days_info['price10'],sotck_days_info['price20'],sotck_days_info['price_avg'],sotck_days_info['price_diff'],
+                    sotck_days_info['rate_max'],sotck_days_info['rate_min'],sotck_days_info['rate_avg'],
+                    sotck_days_info['rate_diff'],sotck_days_info['rate_diff_avg'],sotck_days_info['rate_yq'],sotck_days_info['is_yq'],
+                )
+
+                # print(sql)
+
                 self.Model.update_One(sql)
             page = page + 1
 

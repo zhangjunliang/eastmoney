@@ -93,6 +93,14 @@ task = {
         'name' : '行情',
         'task' : 'python run.py -o=east -f=info -p=market'
     },
+    90 : {
+        'name' : 'dbk',
+        'task' : 'python run.py -o=dbk -f=day_time'
+    },
+    91 : {
+        'name' : 'dbk',
+        'task' : 'python run.py -o=dbk -f=today'
+    },
     99 : {
         'name' : '任务-stock',
         'task' : 'task.bat'

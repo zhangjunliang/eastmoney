@@ -55,12 +55,12 @@ class east(object):
         bk_data = self.east_web.get_stock_bk(secid, 'f14,f12,f3:2:%,f128,f140,f136:2:%')
         self.east_web.dump(bk_data)
 
-    def my(self,weight = None):
+    def my(self,is_zx = None):
 
-        if weight == None:
-            sql = "select * from stock where weight > 0 order by weight"
+        if is_zx == None:
+            sql = "select * from stock where is_zx > 0 order by weight"
         else:
-            sql = "select * from stock where weight > {} order by weight".format(weight)
+            sql = "select * from stock where is_zx > {} order by weight".format(is_zx)
 
         data = self.Model.getAll(sql)
         self.east_web.dump([],'')
