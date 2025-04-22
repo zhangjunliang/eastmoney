@@ -41,7 +41,7 @@ task = {
         'name' : '净流入',
         'task' : 'python run.py -o=east -f=info -p=stock_input'
     },
-    # 10 : { 没有写
+    # 10 : {
     #     'name' : '净流速',
     #     'task' : 'python run.py -o=east -f=info -p=tmp_top'
     # },
@@ -101,6 +101,10 @@ task = {
         'name' : 'dbk',
         'task' : 'python run.py -o=dbk -f=today'
     },
+    98 : {
+        'name' : 'dbk',
+        'task' : 'python run.py -o=stock -f=save_execl'
+    },
     99 : {
         'name' : '任务-stock',
         'task' : 'task.bat'
@@ -132,6 +136,10 @@ while True:  # 创建一个无限循环
         if user_input.lower() == 'exit':  # 检查用户是否想要退出
             print("退出程序。")
             break  # 退出循环
+        elif user_input.isdigit() and len(user_input) == 6:
+            code = user_input
+            os.system('python run.py -o=east -f=code -p={}'.format(code))
+
         elif user_input.isdigit():  # 检查输入是否为数字
             number = int(user_input)  # 将输入转换为整数
             if number == 0:
@@ -145,12 +153,11 @@ while True:  # 创建一个无限循环
                 number = int(inputs[0])
                 page = int(inputs[1])
                 os.system('{} -page={}'.format(task[number]['task'],page))
-            elif len(inputs) == 3:
-                number = int(inputs[0])
-                page = int(inputs[1])
-                limit = int(inputs[2])
-                os.system('{} -page={} -limit={}'.format(task[number]['task'],page,limit))
-
+            # elif len(inputs) == 3:
+            #     number = int(inputs[0])
+            #     page = int(inputs[1])
+            #     limit = int(inputs[2])
+            #     os.system('{} -page={} -limit={}'.format(task[number]['task'],page,limit))
     except Exception as e:
         print("error:{}".format(e))
 

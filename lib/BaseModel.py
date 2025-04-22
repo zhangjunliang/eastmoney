@@ -30,8 +30,9 @@ class BaseModel(object):
         try:
             self.conn.ping(reconnect=True)
         except Exception as e:
-            print(e)
+            # print('重连mysql:{}'.format(str(e)))
             self.conn = self.to_connect(self.config)
+            self.cursor = self.conn.cursor(cursor=pymysql.cursors.DictCursor)
 
     # 获取一条
     def getOne(self, sql):
@@ -54,6 +55,23 @@ class BaseModel(object):
         self.conn.commit()
         return r
 
+    def update(self, table='news_c7f', data={} , where_data = {} , limit = 1):
+
+        set_field = ','.join('`{}` = %s'.format(str(i)) for i in data)
+        where_field = ','.join('`{}` = %s'.format(str(i)) for i in where_data)
+
+        field_data = list(data[i] for i in data)
+        field_data = field_data + list(where_data[i] for i in where_data)
+
+        sql = """update {} set {} where {} limit {}""".format(table,set_field,where_field,limit)
+        return self.update_One(sql, list(str(i) for i in field_data))
+
+    def save(self, table='news_c7f', data={}):
+        field_str = '`,`'.join(str(i) for i in data)
+        field_val = ','.join('%s' for i in data)
+        field_data = list(data[i] for i in data)
+        sql = """INSERT IGNORE INTO {}(`{}`)  VALUE({})""".format(table, field_str, field_val)
+        return self.update_One(sql, list(str(i) for i in field_data))
 
     # 插入更新多条
     def update_more(self, sql, items):

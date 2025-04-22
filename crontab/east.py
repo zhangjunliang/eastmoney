@@ -38,6 +38,11 @@ class east(object):
         secid = '{}.{}'.format(info['market'], info['code'])
         #f57,
         data = self.east_web.get_info(secid, 'f43:2:,f170:2:%,f40:4:,f20:4:')
+
+        data.append(info['price_5'])
+        data.append(info['flow_price'])
+        data.append(int(info['price'] >= info['price_5'] >= info['price_10'] >= info['price_20']))
+
         self.east_web.dump(data)
 
     def fund(self,code = '159707'):
@@ -55,12 +60,12 @@ class east(object):
         bk_data = self.east_web.get_stock_bk(secid, 'f14,f12,f3:2:%,f128,f140,f136:2:%')
         self.east_web.dump(bk_data)
 
-    def my(self,is_zx = None):
+    def my(self,is_select = None):
 
-        if is_zx == None:
-            sql = "select * from stock where is_zx > 0 order by weight"
+        if is_select == None:
+            sql = "select * from stock where is_select > 0 order by weight"
         else:
-            sql = "select * from stock where is_zx > {} order by weight".format(is_zx)
+            sql = "select * from stock where is_select > {} order by weight".format(is_select)
 
         data = self.Model.getAll(sql)
         self.east_web.dump([],'')
@@ -71,12 +76,15 @@ class east(object):
                 f = 'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
                 f = 'f43:2:,f170:2:%,f40:4:,f20:4:'
                 data = self.east_web.get_info(secid, f)
+                data.append(row['price_5'])
+                data.append(row['flow_price'])
+                data.append(int(row['price'] >= row['price_5'] >= row['price_10'] >= row['price_20']))
             elif row['type'] == 2:
                 f = 'f57,f43:3:,f170:2:%,f40:4:,f20:4:'
+                f = 'f43:3::3,f170:2:%,f40:4:,f20:4:'
                 data = self.east_web.get_fund(secid, f)
             else:
                 data = []
-
             self.east_web.dump(data)
 
     def top(self):

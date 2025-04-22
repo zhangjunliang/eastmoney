@@ -10,21 +10,29 @@ import hashlib
 import lib.public as public
 import requests
 from DrissionPage import ChromiumPage, ChromiumOptions
-
+from curl_cffi import requests as curl_requests
+from loguru import logger
+import re
+from config import Config
+from lib.BaseModel import BaseModel
 
 class east_web(object):
 
     _t = '0014416471786912188'
     delay_min = 1
     delay_max = 3
+    timeout = 15
 
     def __init__(self):
         # self._t = round(time.time()*1000)
+        self.Config = Config()
+        self.Model = BaseModel(self.Config.mysql)
         self.pageNo = public.get('page')
         self.pageSize = public.get('limit')
         pass
 
     def delay_sleep(self):
+
         delay = random.uniform(self.delay_min, self.delay_max)
         print("delay:" + str(delay))
         time.sleep(delay)
@@ -98,10 +106,152 @@ class east_web(object):
         data = result['data']
         return self._field(fields, data)
 
+    def get_one_info(self,secid = '1.600519' , beg = '20250411' , end = None):
+        if end == None:
+            end = beg
+
+        url = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
+        params = {
+            "secid":secid,
+            "fields1": "f1,f2,f3,f4,f5,f6",
+            "fields2": "f51,f52,f53,f54,f55,f56,f57",
+            "klt": "101",
+            "fqt": "1",
+            "beg": beg,
+            "end": end
+        }
+        result = self.__curl(url,params = params)
+        kline = result['data']['klines'][0].split(",") # 单日数据
+        data = {
+            # "日期": kline[0],
+            # "开盘价": float(kline[1]),
+            # "收盘价": float(kline[2]),
+            # "最高价": float(kline[3]),
+            # "最低价": float(kline[4]),
+            # "成交量": int(kline[5]),
+            "price": float(kline[2]),
+        }
+        return data
+
+    def get_data_info(self,code_str = '835179.BJ'):
+        url = "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        params = {
+            "reportName": "RPT_PCF10_FINANCEMAINFINADATA",
+            "columns": "SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,REPORT_DATE,REPORT_TYPE,EPSJB,EPSKCJB,EPSXS,BPS,MGZBGJ,MGWFPLR,MGJYXJJE,TOTAL_OPERATEINCOME,TOTAL_OPERATEINCOME_LAST,PARENT_NETPROFIT,PARENT_NETPROFIT_LAST,KCFJCXSYJLR,KCFJCXSYJLR_LAST,ROEJQ,ROEJQ_LAST,XSMLL,XSMLL_LAST,ZCFZL,ZCFZL_LAST,YYZSRGDHBZC_LAST,YYZSRGDHBZC,NETPROFITRPHBZC,NETPROFITRPHBZC_LAST,KFJLRGDHBZC,KFJLRGDHBZC_LAST,TOTALOPERATEREVETZ,TOTALOPERATEREVETZ_LAST,PARENTNETPROFITTZ,PARENTNETPROFITTZ_LAST,KCFJCXSYJLRTZ,KCFJCXSYJLRTZ_LAST,TOTAL_SHARE,FREE_SHARE,EPSJB_PL,BPS_PL,FORMERNAME",
+            "quoteColumns": "",
+            "filter": "(SECUCODE=\"{}\")".format(code_str),
+            "sortTypes": "-1",
+            "sortColumns": "REPORT_DATE",
+            "pageNumber": "1",
+            "pageSize": "1",
+            "source": "HSF10",
+            "client": "PC",
+            "v": "020927624979895532"
+        }
+        result = self.__curl(url,params = params)
+        data = result['result']['data'][0]
+
+        result_data = {
+            'gross_price' : self._field_type(data['TOTAL_OPERATEINCOME'],8,'', num = 3),
+            'profit_price': self._field_type(data['PARENT_NETPROFIT'],8,'' , num = 4),
+            'gross_rate': self._field_type(data['TOTALOPERATEREVETZ'],0,'', num = 2),
+            'profit_rate': self._field_type(data['PARENTNETPROFITTZ'],0,'', num = 2)
+        }
+        return result_data
+
+    def get_dividend_info(self,code_str = '835179.BJ'):
+        # # 300661
+        # code = '835179.BJ'
+        # code = '300661.SZ'
+        # code = '600192.SH'
+        # code = '688130.SH'
+        url = "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        params = {
+            "reportName": "RPT_F10_DIVIDENDNEW_PROFILE",
+            "columns": "ALL",
+            "quoteColumns": "",
+            "filter": "(SECUCODE=\"{}\")".format(code_str),
+            "pageNumber": "1",
+            "pageSize": "",
+            "sortTypes": "",
+            "sortColumns": "",
+            "source": "HSF10",
+            "client": "PC",
+            "v": "041181051352188724"
+        }
+        result = self.__curl(url,params = params)
+        data = result['result']['data'][0]
+        result_data = {
+            'dividend_ratio' : self._field_type(data['DIVIDEND_RATIO']*100,0,'', num = 3)
+        }
+        return result_data
+
+    def get_dividend_list(self,code_str = '000953.SZ',secid = '0.000953'):
+        # code_str = '000953.SZ'
+        # secid = '0.000953'
+        url = "https://datacenter.eastmoney.com/securities/api/data/v1/get"
+        params = {
+            "reportName": "RPT_F10_DIVIDEND_MAIN",
+            "columns": "SECUCODE,SECURITY_CODE,SECURITY_NAME_ABBR,NOTICE_DATE,IMPL_PLAN_PROFILE,ASSIGN_PROGRESS,EQUITY_RECORD_DATE,EX_DIVIDEND_DATE,PAY_CASH_DATE,IS_UNASSIGN,REPORT_DATE,ASSIGN_OBJECT,IMPL_PLAN_NEWPROFILE",
+            "filter": "(SECUCODE=\"{}\")(IS_UNASSIGN in(\"0\"))".format(code_str),
+            "client": "APP",
+            "source": "SECURITIES",
+            "pageNumber": "1",
+            "pageSize": "10",
+            "sortTypes": "-1",
+            "sortColumns": "NOTICE_DATE",
+            "rdm": "rnd_A428BCF2ECD9461E8F69E44810B0B85A",
+            "v": "09444965160672538"
+        }
+        result = self.__curl(url,params = params)
+        if result['success'] == False:
+            return False
+
+        data = result['result']['data']
+        result_data = []
+        for row in data:
+            if row['IMPL_PLAN_PROFILE'] == None:
+                continue
+
+            if '元' in row['IMPL_PLAN_PROFILE']:
+                dividend_year = row['REPORT_DATE'][0:4]
+                if int(dividend_year) < 2020:
+                    continue
+
+                if row['EQUITY_RECORD_DATE'] != None:
+                    try:
+                        dividend_price = re.search(r'派([\d.]+)元', row['IMPL_PLAN_PROFILE']).group(1)
+                        beg = public.timestamp_to_date(public.date_to_timestamp(row['EQUITY_RECORD_DATE']), '%Y%m%d')
+                        one_info = self.get_one_info(secid=secid,beg = beg)
+                        dividend_ratio = self._field_type(float(dividend_price) / float(one_info['price']) / 10, 0, '', num=3)
+                        price = one_info['price']
+                    except:
+                        logger.info('error:{},{}'.format(secid,beg))
+                        dividend_price = '0'
+                        dividend_ratio = '0'
+                        price = '0'
+                else:
+                    dividend_price = '0'
+                    dividend_ratio = '0'
+                    price = '0'
+
+                item = {
+                    'dividend_year' : row['REPORT_DATE'][0:4],
+                    'dividend_num': row['REPORT_DATE'][4:],
+                    'dividend_plan': row['IMPL_PLAN_PROFILE'],
+                    'dividend_price': dividend_price,
+                    'dividend_ratio': dividend_ratio,
+                    'price': price,
+                    'dividend_date': row['EQUITY_RECORD_DATE']
+                }
+                result_data.append(item)
+        return result_data
+
+
     # 获取股票日金额
-    def get_day_info(self,secid):
-        url = ('https://push2his.eastmoney.com/api/qt/stock/kline/get?secid={}&klt=101&fqt=1&lmt=66&end=20500000&iscca=1&fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1'\
-               .format(secid))
+    def get_day_info(self,secid,lmt = 66):
+        url = ('https://push2his.eastmoney.com/api/qt/stock/kline/get?secid={}&klt=101&fqt=1&lmt={}&end=20500000&iscca=1&fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1'\
+               .format(secid,lmt))
         result = self.__curl(url)
         data = result['data']['klines']
         data_days = []
@@ -109,76 +259,6 @@ class east_web(object):
             item_val = item.split(',')
             data_days.append(item_val)
         return data_days
-
-    def get_days_info(self,secid,data = None):
-        if data == None:
-            data = self.get_day_info(secid)
-        num5 = 5
-        num10 = 10
-        num20 = 20
-
-        price5 = round(sum([float(i[2]) for i in data[0:num5]]) / num5,2)
-        price10 = round(sum([float(i[2]) for i in data[0:num10]]) / num10, 2)
-        price20 = round(sum([float(i[2]) for i in data[0:num20]]) / num20, 2)
-
-        rate5 = round(sum([float(i[8]) for i in data[0:num5]]) / num5, 2)
-        rate10 = round(sum([float(i[8]) for i in data[0:num10]]) / num10, 2)
-        rate20 = round(sum([float(i[8]) for i in data[0:num20]]) / num20, 2)
-
-        days_rate = [float(i[8]) for i in data[0:num20]]
-        rate_max = max(days_rate)
-        rate_min = min(days_rate)
-
-        price = float(data[0][2])
-        rate = float(data[0][8])
-
-        price_avg = round(sum(list([price5,price10,price20])) / 3,2)
-        price_diff = round(price - price_avg,2)
-
-        rate_avg = round(sum(list([rate5, rate10, rate20])) / 3, 2)
-        rate_diff = round(sum(list([abs(rate_max), abs(rate_min)])) / 2, 2)
-        rate_yq = round(rate_diff/2, 2)
-
-        rate_diff_avg = round((price - price_avg)/price * 100, 4)
-
-        is_yq = 0
-        if abs(rate_avg) <=  0.2 and rate_diff > 3 and rate_diff < 8:
-            if rate > 0 and rate >= rate_yq:
-                # 卖出信号
-                is_yq = 2
-            elif rate < 0 and rate <= rate_avg * -1:
-                #买入信号
-                is_yq = 1
-            else:
-                # 持有
-                is_yq = 3
-        elif rate > 5:
-            # 突破
-            is_yq = 10
-        elif rate < -5:
-            # 加速下跌
-            is_yq = 11
-        else:
-            #未建模
-            is_yq = 12
-
-        result = {
-            'price5':price5,
-            'price10': price10,
-            'price20': price20,
-            'price_avg': price_avg,
-            'price_diff': price_diff,
-            'rate': rate,
-            'rate_max': rate_max,
-            'rate_min': rate_min,
-            'rate_avg': rate_avg,
-            'rate_diff': rate_diff,
-            'rate_diff_avg': rate_diff_avg,
-            'rate_yq': rate_yq,
-            'is_yq': is_yq
-        }
-        return result
-
 
     # 获取股票的板块信息
     def get_stock_bk(self, code, fields):
@@ -443,7 +523,7 @@ class east_web(object):
                    "Cookie": "qgqp_b_id=fc02c3c5d5757e0ebe013b0d706fbdf8; st_si=84209263837817; HAList=a-sz-300059-%u4E1C%u65B9%u8D22%u5BCC; em_hq_fls=js; wap_ck2=true; ad_tc_221000003503280169=true; st_asi=delete; ct=sMsG5cOnZgRJxVuZD2_tRcyXrZ5gXdPJt9QTVDP0UCeBKG_y0Zc1-2ofo8sCS9-9_GNiZV0DEiM2pBzOvX5taCQai0wtbSykTKeH-KzxsM4h2GVNTjQIhU6LLDz3qa0sXf541mYXfqAop52eXgKjkA9aKEs_rl_f9p8l6Z60BBc; ut=FobyicMgeV4UJna6Au6ASo611uEU66P6lcORe-20kRYhzrJaWyHmvtg9Lu8rWySGIHys9DGA3uES42hfEGU0lL7XQ252U3r9-ys9kLgHkSjbLzv4p4_vWAUKo4KBEwSNbm2QhkIcoBDJBu8sN2fQN0JdvbAMlRRF-iAUIhuQ2QEmgDTD1QCmKcpL15f3bEkY6gQSEoSXPXaXXMAunzP-WUGnGa7LTxg_ahb1hVYpCshvD_VyWMahOoDYLxbEz70cVfG3hXd9oYRBngX4I_aa5rEHTEq9o3o6; pi=3704094407396500%3bm3704094407396500%3b%e4%b8%80%e5%8f%aa%e4%bf%ae%e8%a1%8c%e7%9a%84%e9%b1%bc%3b5xMsLWvtmg%2b%2bYv8kae4hv7gT1GdGTfTJlqnQx0MZdWKXomUbGYD1aWjU%2ba2X7jKsz3bN2C1ebREEBrRhiax%2baCyM1ry2fgUPN0U8Yw5x7fMMX3bEGItoNguhAKVRomeY4lkCnb5GL9tN6BhzrQ1vKjEW7INMmdK9WC6M2Ygy9J3RCgooiDXC8FPGz%2bKIlgJTEdufheVl%3bYxZMCANU00tIiZca2HK8YvhJTpOXl%2fatWWuAvXnonAQgXLNmW3KdggmEmaRuh4n8Kz1t085vCOAVbIgphijU2B7DKfEgnx%2fqLC%2f3z9iqQnqvVfO3FEXVhAqRofxPa7qPJWRNVGoFp%2brYCKr765VqqrpooYzpbA%3d%3d; uidal=3704094407396500%e4%b8%80%e5%8f%aa%e4%bf%ae%e8%a1%8c%e7%9a%84%e9%b1%bc; sid=113949887; vtpst=|; st_pvi=48598162530870; st_sp=2021-04-26%2013%3A34%3A59; st_inirUrl=https%3A%2F%2Fwww.baidu.com%2Flink; st_sn=118; st_psi=20210621134619640-113803310772-1947146732"}
 
         req = urllib.request.Request(url=url, headers=headers)
-        resp = urllib.request.urlopen(req, timeout=10)
+        resp = urllib.request.urlopen(req, timeout = self.timeout)
         html = resp.read().decode('utf8')
         data = json.loads(html)
 
@@ -534,62 +614,17 @@ class east_web(object):
         if is_print != True:
             return result_data
 
-    def get_lottery(self, name = 'ssq',issueCount = 1, is_print = True):
-        #3d
-        url = 'http://www.cwl.gov.cn/cwl_admin/front/cwlkj/search/kjxx/findDrawNotice?name={}&issueCount={}&issueStart=&issueEnd=&dayStart=&dayEnd=' \
-            .format(name,issueCount)
-        res = requests.get(url,headers={}, timeout=30)
-        html = res.content
-        data = json.loads(html)
-        if data['state'] == 0:
-            result = []
-            for i in data['result']:
-                red_list = i['red'].split(',')
-                item = {}
-                item['type'] = name
-                item['name'] = i['name']
-                item['code'] = i['code']
-                item['date'] = i['date'][0:10]
-                item['week'] = i['week']
-                item['red1'] = int(red_list[0])
-                item['red2'] = int(red_list[1])
-                item['red3'] = int(red_list[2])
-                item['red4'] = int(red_list[3])
-                item['red5'] = int(red_list[4])
-                item['red6'] = int(red_list[5])
-                item['blue1'] = int(i['blue'])
-                item['blue2'] = 0 if i['blue2'] == '' else i['blue2']
-                result.append(item)
-            if is_print:
-                for row in result:
-                    print("{}|{}|{}|{}|{},{},{},{},{},{}|{}".format(
-                        row['name'],
-                        row['code'],
-                        row['date'],
-                        row['week'],
-                        row['red1'],
-                        row['red2'],
-                        row['red3'],
-                        row['red4'],
-                        row['red5'],
-                        row['red6'],
-                        row['blue1']
-                    ))
-            else:
-                return result
-        else:
-            return False
-
     def __post(self, url, content_text):
         data = json.dumps(content_text)
         data = bytes(data, 'utf8')
         headers = {"Content-Type": 'application/json'}
         req = urllib.request.Request(url=url, headers=headers, data=data)
-        resp = urllib.request.urlopen(req, timeout=10)
+        resp = urllib.request.urlopen(req, timeout = self.timeout)
         return resp.read().decode('utf8')
 
     def _get(self, tags, url, fields, is_print=True):
         print('{}----------'.format(tags))
+        # print(url)
         data = self.__curl(url)
         data_list = data['data']['diff'];
         result = []
@@ -613,22 +648,29 @@ class east_web(object):
             print('{}----------'.format(tags))
         # data = data[::-1]
         for row in data:
+            if len(row[1]) == 6 and 'BK' not in row[1]:
+
+                sql = 'select * from stock where code = {} limit 1'.format(row[1])
+                stock_data = self.Model.getOne(sql)
+
+                row.append(stock_data['price_5'])
+                row.append(stock_data['flow_price'])
+                row.append(int(stock_data['price'] >= stock_data['price_5'] >= stock_data['price_10'] >= stock_data['price_20']))
+
             if type(row) != list:
                 print('|'.join(str(i) for i in data))
                 return
             print('|'.join(str(i) for i in row))
 
-    def _field_type(self, val, val_type, tags='%'):
+    def _field_type(self, val, val_type = -1, tags='%',num = 2):
         if type(val) == float or type(val) == int:
-            if val_type > 0:
-                if val_type == 3:
-                    quantize_str = '0.000'
-                else:
-                    quantize_str = '0.00'
-
+            if val_type >= 0:
+                quantize_str = str('').zfill(num)
+                quantize_str = '0.{}'.format(quantize_str)
                 val = '{}{}'.format(decimal.Decimal(val / (10 ** val_type) ).quantize(decimal.Decimal(quantize_str)), tags)
             else:
                 val = '{}{}'.format(val, tags)
+
         return val
 
     def _field(self, fields, data):
@@ -647,26 +689,41 @@ class east_web(object):
                 field_tags = str(field_data[2])
             except Exception as e:
                 field_tags = ''
+
+            try:
+                field_num = int(field_data[3])
+            except Exception as e:
+                field_num = 2
+
+
             val = data[field]
             if field == 'f6' or field == 'f62':
-                val = self._field_type(val, 8, '亿')
+                val = self._field_type(val, 8, '亿',field_num)
             else:
-                val = self._field_type(val, field_type, field_tags)
+                val = self._field_type(val, field_type, field_tags,field_num)
 
             item.append(val)
         return item
 
-    def __curl_old(self, url):
+    def __curl_old(self, url,is_json = True,params = {}):
         attempt = 0
-        retries = 3
+        retries = 5
         while attempt < retries:
             try:
-                res = urllib.request.urlopen(url, timeout=30)
-                html = res.read().decode('utf8')
-                data = json.loads(html)
-                return data
+                # res = urllib.request.urlopen(url, timeout = self.timeout)
+                # html = res.read().decode('utf8')
+                # data = json.loads(html)
+                # return data
+                proxies = {}
+                results = curl_requests.get(url=url,params = params, impersonate="chrome120", verify=False, timeout=30, proxies=proxies)
+                # logger.info('url:{} ,{}'.format(url, results.status_code))
+                if is_json:
+                    return results.json()
+                else:
+                    return results.text
+
             except Exception as e:
-                print(e)
+                print('getUrlError:{},{}'.format(str(attempt),str(e)))
                 attempt += 1
 
     def init_browser(self):
@@ -702,8 +759,8 @@ class east_web(object):
         # 用该配置创建页面对象
         self.browser = ChromiumPage(addr_driver_opts=co)
 
-    def __curl(self, url):
-        return self.__curl_old(url)
+    def __curl(self, url, params ={}):
+        return self.__curl_old(url,params = params)
         self.init_browser()
         self.browser.get(url)
         return self.browser.json

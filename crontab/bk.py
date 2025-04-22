@@ -32,11 +32,10 @@ class bk(object):
             print('|'.join(str(i) for i in row))
 
     def save_bk(self):
-        updated = datetime.date.today()
-
-        if is_workday(updated) == False:
-            print('Error:{} not work...'.format(updated))
-            return
+        # updated = datetime.date.today()
+        # if is_workday(updated) == False:
+        #     print('Error:{} not work...'.format(updated))
+        #     sys.exit()
 
         page = 1
         limit = 100
