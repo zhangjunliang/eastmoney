@@ -101,3 +101,16 @@ def date_to_timestamp(date, format_string="%Y-%m-%d %H:%M:%S"):
 def timestamp_to_date(timestamp, format_string="%Y-%m-%d %H:%M:%S"):
     return time.strftime(format_string, time.localtime(timestamp))
 
+
+def calculate_diff_rate(price_5, price_10, price_20):
+    max_price = max(price_5, price_10, price_20)
+    min_price = min(price_5, price_10, price_20)
+    average_price = (price_5 + price_10 + price_20) / 3
+
+    if average_price == 0:
+        return "0.0"  # 避免除以零
+
+    diff_rate = ((max_price - min_price) / average_price) * 100
+    return f"{diff_rate:.1f}"  # 返回字符串类型的格式化结果
+
+

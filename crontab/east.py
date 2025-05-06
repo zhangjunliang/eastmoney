@@ -4,6 +4,7 @@
 from lib.east_web import east_web
 from lib.BaseModel import BaseModel
 from config import Config
+import lib.public as public
 import sys
 
 class east(object):
@@ -76,9 +77,12 @@ class east(object):
                 f = 'f57,f43:2:,f170:2:%,f40:4:,f20:4:'
                 f = 'f43:2:,f170:2:%,f40:4:,f20:4:'
                 data = self.east_web.get_info(secid, f)
-                data.append(row['price_5'])
-                data.append(row['flow_price'])
+                data.append(int(row['flow_price']))
                 data.append(int(row['price'] >= row['price_5'] >= row['price_10'] >= row['price_20']))
+                data.append(public.calculate_diff_rate(row['price_5'] , row['price_10'] , row['price_20']))
+                data.append(row['dividend_ratio'])
+
+
             elif row['type'] == 2:
                 f = 'f57,f43:3:,f170:2:%,f40:4:,f20:4:'
                 f = 'f43:3::3,f170:2:%,f40:4:,f20:4:'

@@ -45,7 +45,7 @@ class stock(object):
         page = 1
         num = 100
         end_page = 5300/num
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor_m3u8:
+        with concurrent.futures.ThreadPoolExecutor(max_workers= 1) as executor_m3u8:
             while True:
                 obj_list = []
                 obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
@@ -54,6 +54,7 @@ class stock(object):
                 if page > end_page:
                     print('save end ok:{}'.format(str(page)))
                     sys.exit()
+
         # while True:
         #     self.save_stock_one(page = page, num = num)
         #     page = page + 1
@@ -101,7 +102,7 @@ class stock(object):
 
     ## 保存所有股票信息
     def save_stock_one(self,page = 1,num = 10):
-        diff_time = 6*60*60
+        diff_time = 12*60*60
 
         snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -291,6 +292,14 @@ class stock(object):
             {
                 'file': './file/qs-30.xlsx',
                 'where': " is_option = '30' ",
+            },
+            {
+                'file': './file/qs-40.xlsx',
+                'where': " is_option = '40' ",
+            },
+            {
+                'file': './file/qs-50.xlsx',
+                'where': " is_option = '50' ",
             },
             {
                 'file': './file/bz-100.xlsx',

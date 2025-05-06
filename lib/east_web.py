@@ -302,17 +302,17 @@ class east_web(object):
     def get_bk_industry(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90+t:2+f:!50&fields=f3,f4,f12,f13,f14,f128,f136&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('板块行业', url, 'f14,f12,f3,f128,f140,f136')
+        self._get('板块行业', url, 'f14,f12,f3::%,f128,f140,f136')
 
     def get_bk_concept(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90+t:3+f:!50&fields=f3,f4,f12,f13,f14,f128,f136&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('板块概念', url, 'f14,f12,f3,f128,f140,f136')
+        self._get('板块概念', url, 'f14,f12,f3::%,f128,f140,f136')
 
     def get_bk_area(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90+t:1+f:!50&fields=f3,f4,f12,f13,f14,f128,f136&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('板块地区', url, 'f14,f12,f3,f128,f140,f136')
+        self._get('板块地区', url, 'f14,f12,f3::%,f128,f140,f136')
 
     def get_stock_top(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?ut=7eea3edcaed734bea9cbfc24409ed989&pn={}&pz={}&po=1&np=1&fltt=2&invt=2&fid=f3&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f148?cb=?&_={}' \
@@ -322,37 +322,37 @@ class east_web(object):
     def get_stock_low(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f148?cb=?&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('跌幅榜', url, 'f14,f12,f3,f2')
+        self._get('跌幅榜', url, 'f14,f12,f3::%,f2')
 
     def get_stock_input(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f62&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f62,f148?cb=?&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('净流入', url, 'f14,f12,f3,f2,f62')
+        self._get('净流入', url, 'f14,f12,f3::%,f2,f62')
 
     def get_stock_change(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f8&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f8,f12,f13,f14,f19,f148?cb=?&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('换手率', url, 'f14,f12,f3,f2,f8')
+        self._get('换手率', url, 'f14,f12,f3::%,f2,f8')
 
     def get_stock_amount(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f10&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f8,f10,f12,f13,f14,f19,f148&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('量比', url, 'f14,f12,f3,f2,f10')
+        self._get('量比', url, 'f14,f12,f3::%12,f10')
 
     def get_stock_money(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f6,f8,f10,f12,f13,f14,f19,f148?cb=?&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('成交额', url, 'f14,f12,f3,f2,f6')
+        self._get('成交额', url, 'f14,f12,f3::%,f2,f6')
 
     def get_tmp_top(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f22,f148?cb=?&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('涨速榜', url, 'f14,f12,f3,f2,f22')
+        self._get('涨速榜', url, 'f14,f12,f3::%,f2,f22::%')
 
     def get_tmp_low(self):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=0&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f22&fs=m:0+t:6+f:!2,m:0+t:13+f:!2,m:0+t:80+f:!2,m:1+t:2+f:!2,m:1+t:23+f:!2&fields=f2,f3,f4,f12,f13,f14,f19,f22,f148?cb=?&_={}' \
             .format(self.pageNo,self.pageSize,self._t)
-        self._get('跌速榜', url, 'f14,f12,f3,f2,f22')
+        self._get('跌速榜', url, 'f14,f12,f3::%,f2,f22::%')
 
     def get_tmp_change(self):
         tags = '盘口异动'
@@ -653,9 +653,12 @@ class east_web(object):
                 sql = 'select * from stock where code = {} limit 1'.format(row[1])
                 stock_data = self.Model.getOne(sql)
 
-                row.append(stock_data['price_5'])
+                # row.append(stock_data['price_5'])
+
                 row.append(stock_data['flow_price'])
                 row.append(int(stock_data['price'] >= stock_data['price_5'] >= stock_data['price_10'] >= stock_data['price_20']))
+                row.append(public.calculate_diff_rate(stock_data['price_5'] , stock_data['price_10'] , stock_data['price_20']))
+                row.append(stock_data['dividend_ratio'])
 
             if type(row) != list:
                 print('|'.join(str(i) for i in data))
@@ -762,7 +765,7 @@ class east_web(object):
     def __curl(self, url, params ={}):
         return self.__curl_old(url,params = params)
         self.init_browser()
-        self.browser.get(url)
+        self.browser.get(url,params = params)
         return self.browser.json
 
     # 处理MD5

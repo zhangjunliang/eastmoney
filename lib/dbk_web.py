@@ -54,7 +54,7 @@ class dbk_web(object):
         else:
             data['status'] = True
             data['msg'] = '交易日'
-        trs = xpath.xpath("//html/body/div/div[6]/table/tbody/tr")
+        trs = xpath.xpath("//html/body/div/div[7]/table/tbody/tr")
         for tr in trs:
             info = {}
             info['top'] = tr.xpath('./td[1]/text()')[0].strip()
@@ -157,6 +157,9 @@ class dbk_web(object):
         response = requests.get(url, timeout=30,verify=False)
         data = response.text
         return data
+        # self.init_browser()
+        # self.browser.get(url,timeout= 10)
+        # return self.browser.html
 
     def init_browser(self):
 
@@ -172,7 +175,7 @@ class dbk_web(object):
         # co.set_proxy('http://{}'.format(proxy_ip))
 
         # 无头模式
-        co.set_argument("--headless")
+        # co.set_argument("--headless")
         # 无痕模式
         co.set_argument("--incognito")
         # 禁用密码保存提示

@@ -9,6 +9,7 @@ import time
 from config import Config
 import sys
 import datetime
+from loguru import logger
 from chinese_calendar import is_workday, is_holiday
 
 class dbk(object):
@@ -101,12 +102,21 @@ class dbk(object):
                     for info in data['info']:
                         info['day_time'] = day
                         info['top_num'] = data['top']
-                        stock_info = self.get_one(info['code'])
-                        info['price'] = stock_info[1]
-                        info['market_price'] = stock_info[2]
-                        info['flow_price'] = stock_info[3]
-                        print(info)
-                        self.save('stock_dbk',info)
+                        stock_dbk_data = self.Model.getOne("select * from stock_dbk where code = '{}' and day_time = '{}'".\
+                               format(info['code'],day))
+                        # 类型1 写入 2 更新 3 已更新跳过
+                        if stock_dbk_data != None:
+                            task_type = 2
+                            logger.info('day:{},code:{},task_type:{} '.format(day, info['code'], task_type))
+                            continue
+                        else:
+                            task_type = 1
+                            stock_info = self.get_one(info['code'])
+                            info['price'] = stock_info[1]
+                            info['market_price'] = stock_info[2]
+                            info['flow_price'] = stock_info[3]
+                            self.save('stock_dbk',info)
+                            logger.info('day:{},code:{},task_type:{} '.format(day, info['code'], task_type))
 
 def init():
     return dbk()
