@@ -45,7 +45,7 @@ class stock(object):
         page = 1
         num = 100
         end_page = 5300/num
-        with concurrent.futures.ThreadPoolExecutor(max_workers= 1) as executor_m3u8:
+        with concurrent.futures.ThreadPoolExecutor(max_workers = 1) as executor_m3u8:
             while True:
                 obj_list = []
                 obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
@@ -102,7 +102,7 @@ class stock(object):
 
     ## 保存所有股票信息
     def save_stock_one(self,page = 1,num = 10):
-        diff_time = 12*60*60
+        diff_time = 6*60*60
 
         snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -304,6 +304,10 @@ class stock(object):
             {
                 'file': './file/bz-100.xlsx',
                 'where': " weight = '100' ",
+            },
+            {
+                'file': './file/bz-200.xlsx',
+                'where': " weight = '200' ",
             }
         ]
 

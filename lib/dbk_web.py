@@ -54,7 +54,7 @@ class dbk_web(object):
         else:
             data['status'] = True
             data['msg'] = '交易日'
-        trs = xpath.xpath("//html/body/div/div[7]/table/tbody/tr")
+        trs = xpath.xpath("//html/body/div/div[6]/table/tbody/tr")
         for tr in trs:
             info = {}
             info['top'] = tr.xpath('./td[1]/text()')[0].strip()

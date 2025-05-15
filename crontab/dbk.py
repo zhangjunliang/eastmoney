@@ -93,7 +93,7 @@ class dbk(object):
         result = self.dbk_web.day_time(today_time)
         print(result['data'])
 
-    def day_time(self,day_num = 3):
+    def day_time(self,day_num = 5):
         for i in range(int(time.time())-86400*day_num, int(time.time())+86400, 86400):
             day = time.strftime("%Y%m%d", time.localtime(i))
             result = self.dbk_web.day_time(day)
