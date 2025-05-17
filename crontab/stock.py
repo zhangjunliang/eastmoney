@@ -45,7 +45,7 @@ class stock(object):
         page = 1
         num = 100
         end_page = 5300/num
-        with concurrent.futures.ThreadPoolExecutor(max_workers = 1) as executor_m3u8:
+        with concurrent.futures.ThreadPoolExecutor(max_workers = 2) as executor_m3u8:
             while True:
                 obj_list = []
                 obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
@@ -62,43 +62,6 @@ class stock(object):
         #         print('save end ok:{}'.format(str(page)))
         #         sys.exit()
 
-    def save_stock_history(self):
-        #  where code = '002241'
-        data = self.Model.getAll("select * from stock")
-        logger.info('start')
-        for stock_row in data:
-            secids = str(stock_row['market']) + '.' + str(stock_row['code'])
-            logger.info('code:{}'.format(secids))
-            today_day = time.strftime('%Y-%m-%d')
-            stock_history_data = self.Model.getOne(
-                "select * from stock_history where code = '{}' and 'day_time' = '{}' " \
-                .format(stock_row['code'], today_day))
-            if stock_history_data != None:
-                logger.info('exist:{}.today_day'.format(stock_row['code'], today_day))
-                continue
-
-            history_info = self.east.get_day_info(secids)
-            for day_info in history_info:
-                stock_history_data = self.Model.getOne("select * from stock_history where code = '{}' and 'day_time' = '{}' " \
-                     .format(stock_row['code'],day_info[0]))
-                if stock_history_data == None:
-                    save_data = {
-                        'name': stock_row['name'],
-                        'code': stock_row['code'],
-                        'day_time': day_info[0],
-                        'price': day_info[2],
-                        'price_start': day_info[1],
-                        'price_high': day_info[3],
-                        'price_low': day_info[4],
-                        'price_rate': day_info[9],
-                        'rate': day_info[8],
-                        'rate_diff': day_info[7],
-                        'rate_change': day_info[10],
-                        'deal_amount': round(float(day_info[5]) / 10000,2),
-                        'deal_price': round(float(day_info[6]) / 10000,2)
-                    }
-                    self.Model.save('stock_history',save_data)
-        logger.info('end')
 
     ## 保存所有股票信息
     def save_stock_one(self,page = 1,num = 10):
@@ -154,6 +117,26 @@ class stock(object):
             data_info = self.east.get_data_info(code_str)
 
             history_info = self.east.get_day_info(secid,lmt = 20)
+            for day_info in history_info:
+                history_data = self.Model.getOne("select * from history where code = '{}' and 'day_time' = '{}' " \
+                     .format(row[1],day_info[0]))
+                if history_data == None:
+                    save_data = {
+                        'name': row[0],
+                        'code': row[1],
+                        'day_time': day_info[0],
+                        'price': day_info[2],
+                        'price_start': day_info[1],
+                        'price_high': day_info[3],
+                        'price_low': day_info[4],
+                        'price_rate': day_info[9],
+                        'rate': day_info[8],
+                        'rate_diff': day_info[7],
+                        'rate_change': day_info[10],
+                        'deal_amount': round(float(day_info[5]) / 10000,2),
+                        'deal_price': round(float(day_info[6]) / 10000,2)
+                    }
+                    self.Model.save('history',save_data)
 
             price_5 = public.avg(history_info, num = 5,field = 2)
             price_10 = public.avg(history_info, num = 10, field = 2)
@@ -182,18 +165,12 @@ class stock(object):
                 'snatch_time': snatch_time,
             }
             if task_type == 1:
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    obj_list = []
-                    obj = executor.submit(self.Model.save, table='stock', data=save_data)
-                    obj_list.append(obj)
+                self.Model.save(table = 'stock', data = save_data)
             else:
                 where_data = {
                     'code': code
                 }
-                with concurrent.futures.ThreadPoolExecutor() as executor:
-                    obj_list = []
-                    obj = executor.submit(self.Model.update, table='stock', data=save_data ,where_data = where_data , limit = 1)
-                    obj_list.append(obj)
+                self.Model.update(table = 'stock', data = save_data, where_data = where_data, limit = 1)
 
         print('end:{}'.format(str(page)))
         return True

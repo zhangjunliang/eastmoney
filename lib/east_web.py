@@ -252,6 +252,8 @@ class east_web(object):
     def get_day_info(self,secid,lmt = 66):
         url = ('https://push2his.eastmoney.com/api/qt/stock/kline/get?secid={}&klt=101&fqt=1&lmt={}&end=20500000&iscca=1&fields1=f1,f2,f3,f4,f5,f6,f7,f8&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63,f64&ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1'\
                .format(secid,lmt))
+
+        # print(url)
         result = self.__curl(url)
         data = result['data']['klines']
         data_days = []
@@ -290,8 +292,8 @@ class east_web(object):
             .format(self._t)
         self._get('指数', url, 'f14,f2,f3:0:%,f6:8:亿,f62:0:')
 
-    def get_bk(self, page=1, limit=10, fields='f14,f12,f3,f128,f140,f136', is_print=True):
-        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127&_={}' \
+    def get_bk(self, page=1, limit=10, fields='', is_print=True):
+        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127,f2&_={}' \
             .format(str(page), str(limit), self._t)
         # print(url)
         if is_print:
@@ -698,6 +700,7 @@ class east_web(object):
             except Exception as e:
                 field_num = 2
 
+            # print(data,field)
 
             val = data[field]
             if field == 'f6' or field == 'f62':

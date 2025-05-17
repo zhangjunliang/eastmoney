@@ -8,6 +8,8 @@ from config import Config
 import sys
 import datetime
 from chinese_calendar import is_workday, is_holiday
+import lib.public as public
+from loguru import logger
 
 class bk(object):
 
@@ -39,28 +41,93 @@ class bk(object):
 
         page = 1
         limit = 100
+        diff_time = 6 * 60 * 60
+        snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
+
         while True:
             print(page)
             try:
-                result = self.east.get_bk(page,limit,'',False)
+                result = self.east.get_bk(page, limit, '', False)
             except TypeError as e:
                 print(repr(e))
                 print('over')
                 sys.exit()
             except Exception as e:
                 continue
+
             for row in result:
 
-                bk_id = int(row['f12'][2:])
+                bk_code = row['f12']
+                bk_data = self.Model.getOne("select * from bk where bk_code = '{}'".format(str(bk_code)))
 
-                sql = """INSERT INTO bk (id,bk_name,bk_code,rate,rate_3) VALUE('{}','{}','{}','{}','{}') ON DUPLICATE KEY UPDATE 
-                    id = VALUES( id ),
-                    bk_name = VALUES( bk_name ),
-                    bk_code = VALUES( bk_code ),
-                    rate = VALUES( rate ),
-                    rate_3 = VALUES( rate_3 )
-                """.format(bk_id, row['f14'], row['f12'], row['f3'],row['f127'])
-                self.Model.update_One(sql)
+                # 类型1 写入 2 更新 3 已更新跳过
+                task_type = 1
+                if bk_data != None:
+
+                    if bk_data['snatch_time'] == "0000-00-00 00:00:00":
+                        bk_snatch_time = 0
+                    else:
+                        bk_snatch_time = public.date_to_timestamp(str(bk_data['snatch_time']))
+
+                    if public.date_to_timestamp(snatch_time) - bk_snatch_time > diff_time:
+                        task_type = 2
+                    else:
+                        task_type = 3
+
+                logger.info('page:{},code:{},task_type:{} '.format(page, bk_code, task_type))
+                if task_type == 3:
+                    continue
+
+                secid = '{}.{}'.format('90',row['f12'])
+                history_info = self.east.get_day_info(secid, lmt=20)
+                for day_info in history_info:
+                    history_data = self.Model.getOne("select * from history where code = '{}' and 'day_time' = '{}' " \
+                                                     .format(row['f12'], day_info[0]))
+                    if history_data == None:
+                        save_data = {
+                            'name': row['f14'],
+                            'code': row['f12'],
+                            'day_time': day_info[0],
+                            'price': day_info[2],
+                            'price_start': day_info[1],
+                            'price_high': day_info[3],
+                            'price_low': day_info[4],
+                            'price_rate': day_info[9],
+                            'rate': day_info[8],
+                            'rate_diff': day_info[7],
+                            'rate_change': day_info[10],
+                            'deal_amount': round(float(day_info[5]) / 10000, 2),
+                            'deal_price': round(float(day_info[6]) / 10000, 2)
+                        }
+                        self.Model.save('history', save_data)
+
+                price_5 = public.avg(history_info, num=5, field=2)
+                price_10 = public.avg(history_info, num=10, field=2)
+                price_20 = public.avg(history_info, num=20, field=2)
+
+                bk_id = int(row['f12'][2:])
+                save_data = {
+                    'id' : bk_id,
+                    'bk_name': row['f14'],
+                    'bk_code': row['f12'],
+                    'rate': row['f3'],
+                    'rate_3': row['f127'],
+                    'price': row['f2'],
+                    'price_5': price_5,
+                    'price_10': price_10,
+                    'price_20': price_20,
+                    'is_option': '0',
+                    'weight': '0',
+                    'snatch_time': snatch_time,
+                }
+
+                if task_type == 1:
+                    self.Model.save(table='bk', data=save_data)
+                else:
+                    where_data = {
+                        'bk_code': bk_code
+                    }
+                    self.Model.update(table='bk', data=save_data, where_data=where_data,limit=1)
 
             page = page + 1
 

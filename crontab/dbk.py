@@ -70,9 +70,6 @@ class dbk(object):
             secid = '{}.{}'.format('0', code)
 
         stock_info = self.east_web.get_info(secid, 'f57,f43:2:,f116:8:,f117:8:,f170:2:%,f40:4:,f20:4:')
-
-        # stock_history_data = self.Model.getAll("select * from stock_history where code = '{}' order by day_time desc ".format(str(info['code'])))
-
         return stock_info
 
     def get_one(self, code='600733'):
