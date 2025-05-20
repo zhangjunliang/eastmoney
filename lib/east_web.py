@@ -293,9 +293,9 @@ class east_web(object):
         self._get('指数', url, 'f14,f2,f3:0:%,f6:8:亿,f62:0:')
 
     def get_bk(self, page=1, limit=10, fields='', is_print=True):
-        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127,f2&_={}' \
+        url = 'https://push2.eastmoney.com/api/qt/clist/get?pn={}&pz={}&po=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90&fields=f3,f4,f12,f13,f14,f128,f136,f127,f2,f19&_={}' \
             .format(str(page), str(limit), self._t)
-        # print(url)
+
         if is_print:
             self._get('板块', url, fields, is_print)
         else:

@@ -106,10 +106,13 @@ class bk(object):
                 price_20 = public.avg(history_info, num=20, field=2)
 
                 bk_id = int(row['f12'][2:])
+                bk_type = row['f19']
+
                 save_data = {
                     'id' : bk_id,
                     'bk_name': row['f14'],
                     'bk_code': row['f12'],
+                    'bk_type': bk_type,
                     'rate': row['f3'],
                     'rate_3': row['f127'],
                     'price': row['f2'],
@@ -124,6 +127,10 @@ class bk(object):
                 if task_type == 1:
                     self.Model.save(table='bk', data=save_data)
                 else:
+
+                    del save_data['is_option']
+                    del save_data['weight']
+
                     where_data = {
                         'bk_code': bk_code
                     }

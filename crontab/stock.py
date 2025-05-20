@@ -45,22 +45,22 @@ class stock(object):
         page = 1
         num = 100
         end_page = 5300/num
-        with concurrent.futures.ThreadPoolExecutor(max_workers = 2) as executor_m3u8:
-            while True:
-                obj_list = []
-                obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
-                obj_list.append(obj)
-                page = page + 1
-                if page > end_page:
-                    print('save end ok:{}'.format(str(page)))
-                    sys.exit()
+        # with concurrent.futures.ThreadPoolExecutor(max_workers = 1) as executor_m3u8:
+        #     while True:
+        #         obj_list = []
+        #         obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
+        #         obj_list.append(obj)
+        #         page = page + 1
+        #         if page > end_page:
+        #             print('save end ok:{}'.format(str(page)))
+        #             sys.exit()
 
-        # while True:
-        #     self.save_stock_one(page = page, num = num)
-        #     page = page + 1
-        #     if page > end_page:
-        #         print('save end ok:{}'.format(str(page)))
-        #         sys.exit()
+        while True:
+            self.save_stock_one(page = page, num = num)
+            page = page + 1
+            if page > end_page:
+                print('save end ok:{}'.format(str(page)))
+                sys.exit()
 
 
     ## 保存所有股票信息
@@ -93,11 +93,10 @@ class stock(object):
             # 类型1 写入 2 更新 3 已更新跳过
             task_type = 1
             if stock_data != None:
-
-                if stock_data['snatch_time'] == "0000-00-00 00:00:00":
-                    stock_snatch_time = 0
-                else:
+                try:
                     stock_snatch_time = public.date_to_timestamp(str(stock_data['snatch_time']))
+                except:
+                    stock_snatch_time = 0
 
                 if public.date_to_timestamp(snatch_time) - stock_snatch_time > diff_time:
                     task_type = 2
@@ -220,25 +219,43 @@ class stock(object):
         #     print('Error:{} not work...'.format(updated))
         #     sys.exit()
 
+        diff_time = 6 * 60 * 60
+
+        snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
         page = 0
         limit = 100
         clear_sql = "DELETE FROM stock_bk WHERE bk_code IN ( 'BK0816', 'BK0815', 'BK0817')"
         self.Model.update_One(clear_sql)
+
         while True:
-            print(page)
-            self.east.delay_sleep()
-            data = self.Model.getAll("select * from stock limit {},{}".format(limit * page, limit))
+            logger.info('start:{}'.format(str(page)))
+            data = self.Model.getAll("select * from stock where type = 1 limit {},{}".format(limit * page, limit))
             if len(data) < 1:
                 print('over')
                 sys.exit()
             for stock_row in data:
                 secids = str(stock_row['market']) + '.' + stock_row['code']
-                # print(secids)
+
+                stock_data = self.Model.getOne("select * from stock where code = '{}'".format(str(stock_row['code'])))
+                # 类型1更新 2 已更新跳过
+                try:
+                    stock_bk_snatch_time = public.date_to_timestamp(str(stock_data['bk_snatch_time']))
+                except:
+                    stock_bk_snatch_time = 0
+
+                if public.date_to_timestamp(snatch_time) - stock_bk_snatch_time > diff_time:
+                    task_type = 1
+                else:
+                    task_type = 2
+
+                logger.info('page:{},code:{},task_type:{}'.format(str(page), str(stock_row['code']),task_type))
+                if task_type == 2:
+                    continue
+
                 try:
                     bk_data = self.east.get_stock_bk(secids, '')
                 except Exception as e:
-                    print(e)
-                    page = page - 1
+                    # page = page - 1
                     break
 
                 for row in bk_data:
@@ -252,7 +269,19 @@ class stock(object):
                                bk_name = VALUES( bk_name ),
                                bk_code = VALUES( bk_code )
                            """.format(stock_row['name'], stock_row['code'], stock_row['market'], row['f14'], row['f12'])
+
+
                     self.Model.update_One(sql)
+
+                save_data = {
+                    'bk_snatch_time': snatch_time
+                }
+                where_data = {
+                    'code': stock_row['code']
+                }
+                self.Model.update(table='stock', data=save_data, where_data=where_data, limit=1)
+
+            logger.info('end:{}'.format(str(page)))
             page = page + 1
 
     def save_execl(self):
