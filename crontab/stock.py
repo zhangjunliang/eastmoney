@@ -45,29 +45,29 @@ class stock(object):
         page = 1
         num = 100
         end_page = 5300/num
-        # with concurrent.futures.ThreadPoolExecutor(max_workers = 1) as executor_m3u8:
-        #     while True:
-        #         obj_list = []
-        #         obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
-        #         obj_list.append(obj)
-        #         page = page + 1
-        #         if page > end_page:
-        #             print('save end ok:{}'.format(str(page)))
-        #             sys.exit()
+        with concurrent.futures.ThreadPoolExecutor(max_workers = 1) as executor_m3u8:
+            while True:
+                obj_list = []
+                obj = executor_m3u8.submit(self.save_stock_one, page = page, num = num)
+                obj_list.append(obj)
+                page = page + 1
+                if page > end_page:
+                    print('save end ok:{}'.format(str(page)))
+                    sys.exit()
 
-        while True:
-            self.save_stock_one(page = page, num = num)
-            page = page + 1
-            if page > end_page:
-                print('save end ok:{}'.format(str(page)))
-                sys.exit()
+        # while True:
+        #     self.save_stock_one(page = page, num = num)
+        #     page = page + 1
+        #     if page > end_page:
+        #         print('save end ok:{}'.format(str(page)))
+        #         sys.exit()
 
 
     ## 保存所有股票信息
     def save_stock_one(self,page = 1,num = 10):
-        diff_time = 6*60*60
-
         snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
+        diff_time = public.date_to_timestamp(snatch_time) - public.date_to_timestamp(time.strftime('%Y-%m-%d 15:00:00'))
+        # diff_time = 6 * 60 * 60
 
         logger.info('start:{}'.format(str(page)))
 
@@ -219,9 +219,12 @@ class stock(object):
         #     print('Error:{} not work...'.format(updated))
         #     sys.exit()
 
-        diff_time = 6 * 60 * 60
-
         snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
+        diff_time = public.date_to_timestamp(snatch_time) - public.date_to_timestamp(time.strftime('%Y-%m-%d 15:00:00'))
+        print(diff_time)
+        sys.exit()
+        # diff_time = 6 * 60 * 60
+
         page = 0
         limit = 100
         clear_sql = "DELETE FROM stock_bk WHERE bk_code IN ( 'BK0816', 'BK0815', 'BK0817')"
