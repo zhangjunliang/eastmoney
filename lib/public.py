@@ -2,6 +2,9 @@
 # -*- coding=UTF-8 -*-
 import sys
 import time
+from decimal import Decimal
+import datetime
+
 
 def init():
     global global_dict
@@ -112,5 +115,90 @@ def calculate_diff_rate(price_5, price_10, price_20):
 
     diff_rate = ((max_price - min_price) / average_price) * 100
     return f"{diff_rate:.1f}"  # 返回字符串类型的格式化结果
+
+
+from decimal import Decimal
+from datetime import datetime
+
+
+def calculate_nine_turns(data):
+    """
+    计算神奇九转序列
+
+    参数:
+    data: 股票历史数据列表，包含每个交易日的开盘价、收盘价等信息
+
+    返回:
+    九转序列
+    """
+    nine_turns = []
+    current_trend = None  # 当前趋势（上涨、下跌）
+    current_count = 0  # 当前趋势的计数
+
+    for i in range(1, len(data)):
+        # 计算今日与昨日股价的涨跌幅
+        current_price = data[i]['price']
+        previous_price = data[i - 1]['price']
+        price_change = current_price - previous_price
+
+        # 判断趋势
+        if price_change > 0:
+            current_trend = 'up'
+        elif price_change < 0:
+            current_trend = 'down'
+        else:
+            continue  # 如果价格没有变化，跳过
+
+        # 判断趋势是否改变
+        if current_trend != getattr(current_trend, 'previous_trend', None) and current_trend is not None:
+            nine_turns.append({
+                'date': data[i]['day_time'],
+                'price': current_price,
+                'trend': current_trend,
+                'count': 1
+            })
+            current_count = 1
+        else:
+            if current_trend == 'up' and current_count < 9:
+                current_count += 1
+                nine_turns[-1]['count'] = current_count
+            elif current_trend == 'down' and current_count < 9:
+                current_count += 1
+                nine_turns[-1]['count'] = current_count
+            else:
+                nine_turns.append({
+                    'date': data[i]['day_time'],
+                    'price': current_price,
+                    'trend': current_trend,
+                    'count': 1
+                })
+                current_count = 1
+
+    return nine_turns
+
+
+def calculate_magic_nine_turns(data):
+    """
+    计算神奇九转，结合三转和五转的判断
+
+    参数:
+    data: 股票历史数据列表
+
+    返回:
+    神奇九转序列
+    """
+    nine_turns = calculate_nine_turns(data)
+    magic_nine_turns = []
+
+    # 这里可以结合三转和五转的判断逻辑
+    # 简单示例：只记录连续上涨或下跌9天的转折点
+    for i in range(len(nine_turns)):
+        if nine_turns[i]['count'] == 9:
+            magic_nine_turns.append(nine_turns[i])
+
+    return magic_nine_turns
+
+
+
 
 

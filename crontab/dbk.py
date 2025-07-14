@@ -72,6 +72,35 @@ class dbk(object):
         stock_info = self.east_web.get_info(secid, 'f57,f43:2:,f116:8:,f117:8:,f170:2:%,f40:4:,f20:4:')
         return stock_info
 
+    def get_jz(self, code='002471'):
+
+        data = self.Model.getAll("select * from history where code = '{}' order by day_time desc limit 20".format(code))
+
+        # print(data)
+
+
+
+        # 计算神奇九转
+        nine_turns = public.calculate_nine_turns(data)
+        magic_nine_turns = public.calculate_magic_nine_turns(data)
+
+        # 输出结果
+        print("九转序列:")
+        for turn in nine_turns:
+            print(f"日期: {turn['date']}, 价格: {turn['price']}, 趋势: {turn['trend']}, 计数: {turn['count']}")
+
+        print("\n神奇九转序列:")
+        for magic_turn in magic_nine_turns:
+            print(f"日期: {magic_turn['date']}, 价格: {magic_turn['price']}, 趋势: {magic_turn['trend']}")
+
+        # 根据神奇九转预测市场走势
+        if len(magic_nine_turns) > 0:
+            latest_magic_turn = magic_nine_turns[-1]
+            if latest_magic_turn['trend'] == 'up':
+                print("\n市场可能即将出现下跌转折点")
+            else:
+                print("\n市场可能即将出现上涨转折点")
+
     def get_one(self, code='600733'):
         try:
             info = self.Model.getOne("select * from stock where code = '{}'".format(code))
@@ -90,7 +119,7 @@ class dbk(object):
         result = self.dbk_web.day_time(today_time)
         print(result['data'])
 
-    def day_time(self,day_num = 5):
+    def day_time(self,day_num = 10):
         for i in range(int(time.time())-86400*day_num, int(time.time())+86400, 86400):
             day = time.strftime("%Y%m%d", time.localtime(i))
             result = self.dbk_web.day_time(day)
@@ -108,12 +137,15 @@ class dbk(object):
                             continue
                         else:
                             task_type = 1
-                            stock_info = self.get_one(info['code'])
-                            info['price'] = stock_info[1]
-                            info['market_price'] = stock_info[2]
-                            info['flow_price'] = stock_info[3]
-                            self.save('stock_dbk',info)
-                            logger.info('day:{},code:{},task_type:{} '.format(day, info['code'], task_type))
+                            try:
+                                stock_info = self.get_one(info['code'])
+                                info['price'] = stock_info[1]
+                                info['market_price'] = stock_info[2]
+                                info['flow_price'] = stock_info[3]
+                                self.save('stock_dbk',info)
+                                logger.info('day:{},code:{},task_type:{} '.format(day, info['code'], task_type))
+                            except Exception as e:
+                                logger.info(e)
 
 def init():
     return dbk()

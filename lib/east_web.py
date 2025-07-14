@@ -15,6 +15,7 @@ from loguru import logger
 import re
 from config import Config
 from lib.BaseModel import BaseModel
+import pandas as pd
 
 class east_web(object):
 
@@ -275,9 +276,56 @@ class east_web(object):
             data.append(item)
         return data
 
-    def get_bk_stock(self, code, fields):
+    def get_db_bk(self,code = ''):
+        data = self.Model.getOne('select * from stock_bk where code = "{}" and bk_code in (select bk_code from bk where bk_type = 1)'.format(code))
+        return data
+
+    # 1 本身数据
+    # 2 地区统计
+    # 3 行业统计
+    def get_peak_stock(self,day = None,pagesize = 500 ,type = 1, is_print=True):
+        type = str(type)
+        if day == None:
+            day = public.timestamp_to_date(public.get('date'), '%Y%m%d')
+
+        url = 'https://push2ex.eastmoney.com/getTopicZTPool?ut=7eea3edcaed734bea9cbfc24409ed989&dpt=wz.ztzt&Pageindex=0&pagesize={}&sort=fbt%3Aasc&date={}&_={}'.\
+            format(pagesize,day, self._t)
+        result = self.__curl(url)
+        peak_data = []
+        for row in result['data']['pool']:
+            db_bk_data = self.get_db_bk(row['c'])
+            tmp = {
+                'code' : row['c'],
+                'name' : row['n'],
+                'jump_num': row['zbc'],
+                'day_num': row['lbc'],
+                'price' : self._field_type(row['p'],val_type=3,tags=''),
+                'rand': self._field_type(row['zdp'], val_type=0, tags='%'),
+                'hy_bk': row['hybk'],
+                'db_bk' : db_bk_data['bk_name']
+            }
+            peak_data.append(tmp)
+        if type == '1':
+            data = sorted(peak_data, key=lambda x: (x['day_num'], x['db_bk']),reverse=True)
+        elif type == '2':
+            peak_pd = pd.DataFrame(peak_data)
+            data = peak_pd['db_bk'].value_counts().to_dict()
+        elif type == '3':
+            peak_pd = pd.DataFrame(peak_data)
+            data = peak_pd['hy_bk'].value_counts().to_dict()
+        if is_print:
+            if type == '1':
+                for row in data:
+                    self.dump([row[i] for i in row])
+            else:
+                for row in data:
+                    self.dump([row[0:2],data[row]])
+        else:
+            return data
+    def get_bk_stock(self, code, fields, is_print=True):
         url = 'https://push2.eastmoney.com/api/qt/clist/get?ut=f057cbcbce2a86e2866ab8877db1d059&forcect=1&fs={}&pn={}&pz={}&po=1&fid=f3&invt=2&_={}' \
             .format(code,self.pageNo,self.pageSize, self._t)
+        # logger.info(url)
         result = self.__curl(url)
         list = result['data']['diff']
         data = []
@@ -650,17 +698,28 @@ class east_web(object):
             print('{}----------'.format(tags))
         # data = data[::-1]
         for row in data:
-            if len(row[1]) == 6 and 'BK' not in row[1]:
+            try:
+                if len(row[1]) == 6 and 'BK' not in row[1]:
+                    sql = 'select * from stock where code = {} limit 1'.format(row[1])
+                    stock_data = self.Model.getOne(sql)
 
-                sql = 'select * from stock where code = {} limit 1'.format(row[1])
-                stock_data = self.Model.getOne(sql)
+                    bk_sql = 'select count(*) as num from stock_bk where code = {} and bk_code = "BK0596" limit 1'.format(row[1])
+                    stock_bk_data = self.Model.getOne(bk_sql)
 
-                # row.append(stock_data['price_5'])
+                    row.append('L{}'.format(int(stock_data['flow_price'])))
+                    row.append('Q{}'.format(int(stock_data['price'] >= stock_data['price_5'] >= stock_data['price_10'] >= stock_data['price_20'])))
+                    row.append('F{}'.format(int(stock_data['dividend_ratio'] > 0)))
+                    row.append('R{}'.format(stock_bk_data['num']))
 
-                row.append(stock_data['flow_price'])
-                row.append(int(stock_data['price'] >= stock_data['price_5'] >= stock_data['price_10'] >= stock_data['price_20']))
-                row.append(public.calculate_diff_rate(stock_data['price_5'] , stock_data['price_10'] , stock_data['price_20']))
-                row.append(stock_data['dividend_ratio'])
+                    hy_type = self.get_peak_stock(type=2, is_print=False)
+                    dq_type = self.get_db_bk(code=row[1])
+
+                    d_tag = '{}{}'.format(dq_type['bk_name'][0:1], hy_type.get(dq_type['bk_name'], '0'))
+                    row.append(d_tag)
+
+
+            except Exception as e:
+                pass
 
             if type(row) != list:
                 print('|'.join(str(i) for i in data))

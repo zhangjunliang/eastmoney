@@ -221,8 +221,6 @@ class stock(object):
 
         snatch_time = time.strftime('%Y-%m-%d %H:%M:%S')
         diff_time = public.date_to_timestamp(snatch_time) - public.date_to_timestamp(time.strftime('%Y-%m-%d 15:00:00'))
-        print(diff_time)
-        sys.exit()
         # diff_time = 6 * 60 * 60
 
         page = 0
